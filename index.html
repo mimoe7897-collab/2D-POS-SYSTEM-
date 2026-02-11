@@ -578,25 +578,40 @@ function addToLedgerReal(num, logic, r1, amt1, r2, amt2) {
     else if(groups[num]) groups[num].forEach(p => targets.push(parseInt(p)));
     else if(num) targets.push(parseInt(num));
 
+    // --- FIXED: R should apply to the reverse index (rev) only.
     targets.forEach(idx => {
         if(idx>=0 && idx<100) {
             let rev = parseInt(idx.toString().padStart(2,'0').split('').reverse().join(''));
             let isDouble = (idx%11===0);
             
-            // First amount
-            if(r1==="R") { 
-                masterData[idx]+=v1; 
-                if(!isDouble) masterData[rev]+=v1; 
-            } else { 
-                masterData[idx]+=v1; 
+            // First amount (v1)
+            if (v1 > 0) {
+                if (r1 === "R") {
+                    // Apply to reverse index only (unless double number where rev === idx)
+                    if (isDouble) {
+                        masterData[idx] += v1;
+                    } else {
+                        masterData[rev] += v1;
+                    }
+                } else {
+                    // Normal: apply to the index
+                    masterData[idx] += v1;
+                }
             }
-            
-            // Second amount
-            if(r2==="R") { 
-                masterData[idx]+=v2; 
-                if(!isDouble) masterData[rev]+=v2; 
-            } else if(v2>0) { 
-                masterData[idx]+=v2; 
+
+            // Second amount (v2)
+            if (v2 > 0) {
+                if (r2 === "R") {
+                    // Apply to reverse index only (unless double number where rev === idx)
+                    if (isDouble) {
+                        masterData[idx] += v2;
+                    } else {
+                        masterData[rev] += v2;
+                    }
+                } else {
+                    // Normal: apply to the index
+                    masterData[idx] += v2;
+                }
             }
         }
     });
