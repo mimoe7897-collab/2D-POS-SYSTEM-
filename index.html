@@ -29,32 +29,34 @@
       }
       * { box-sizing: border-box; margin:0; padding:0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
       html,body { height:100%; }
-      body { background: var(--bg); color: var(--gold); height: 100dvh; overflow: hidden; padding:0; }
-      .container { max-width:500px; margin:0 auto; height:100dvh; display:flex; flex-direction:column; border:1px solid var(--gold); padding:6px; }
+      /* Use --vh trick (JS sets --vh) so mobile address-bar doesn't cut off content */
+      body { background: var(--bg); color: var(--gold); height: calc(var(--vh, 1vh) * 100); overflow: hidden; padding:0; }
+      .container { max-width:500px; margin:0 auto; height: calc(var(--vh, 1vh) * 100); display:flex; flex-direction:column; border:1px solid var(--gold); padding:6px; background: #000; }
       .no-print { -webkit-print-color-adjust: exact; }
-      .header { display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--gold); padding:6px; height:40px; }
+      .header { display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--gold); padding:6px; height:40px; flex:0 0 40px; }
       .header h2{ font-size:14px; color:var(--gold); margin:0; }
       .cloud-status { font-size: 11px; display:flex; align-items:center; gap:6px; color:#888; }
       .cloud-dot { width:8px; height:8px; border-radius:50%; }
       .cloud-online { background:#00ff00; box-shadow:0 0 6px #00ff00; }
       .cloud-offline { background:#ff4444; }
-      .top-nav { display:flex; gap:6px; margin:8px 0; }
-      .nav-btn { flex:1; padding:8px; background:#111; color:var(--gold); border:1px solid var(--gold); border-radius:6px; font-weight:bold; cursor:pointer; }
+      .top-nav { display:flex; gap:6px; margin:8px 0; flex:0 0 auto; }
+      .nav-btn { flex:1; padding:8px; background:#111; color:var(--gold); border:1px solid var(--gold); border-radius:6px; font-weight:bold; cursor:pointer; font-size:13px; }
       .nav-btn.active { background:var(--gold); color:#000; }
-      .layer { flex:1; display:none; flex-direction:column; overflow:hidden; }
+      .layer { flex:1 1 auto; display:none; flex-direction:column; overflow:hidden; }
       .layer.active { display:flex; }
-      #display { width:100%; height:50px; background:#111; border:1px solid var(--gold); border-radius:6px; margin-bottom:6px; font-size:26px; color:#fff; text-align:center; outline:none; }
+      #display { width:100%; height:50px; background:#111; border:1px solid var(--gold); border-radius:6px; margin-bottom:6px; font-size:26px; color:#fff; text-align:center; outline:none; padding:6px; }
       .v-header, .v-row { display:grid; grid-template-columns: 1.2fr 1fr 0.4fr 1.2fr 0.4fr 1.2fr 0.5fr; gap:4px; align-items:center; font-size:12px; }
       .v-header { background:#222; padding:6px; color:#fff; border-radius:4px; }
-      .scroll-box { flex:1; overflow-y:auto; background:#080808; border:1px solid #222; padding:6px; border-radius:6px; }
+      .scroll-box { flex:1 1 auto; overflow-y:auto; background:#080808; border:1px solid #222; padding:6px; border-radius:6px; }
       .total-banner { padding:8px; background:var(--gold); color:#000; text-align:center; font-size:16px; font-weight:bold; margin:6px 0; border-radius:6px; }
-      .keypad { display:grid; grid-template-columns: repeat(4, 1fr); gap:6px; padding:6px 0; }
-      .key { background:#333; color:white; border:1px solid #444; padding:12px 0; border-radius:6px; font-weight:bold; font-size:16px; min-height:44px; cursor:pointer; }
+      /* keypad area: make it stay visible and responsive */
+      .keypad { display:grid; grid-template-columns: repeat(4, 1fr); gap:6px; padding:6px 0; flex:0 0 auto; position:sticky; bottom:6px; z-index:20; background:linear-gradient(transparent, rgba(0,0,0,0.4)); }
+      .key { background:#333; color:white; border:1px solid #444; padding:12px 0; border-radius:6px; font-weight:bold; font-size:16px; min-height:44px; cursor:pointer; text-align:center; }
       .num-key { background:#1a1a1a; color:var(--gold); font-size:18px; }
       .ent-key { background:var(--gold); color:#000; grid-column: span 3; }
       .del-key { background:#b71c1c; }
       .print-key { background:var(--blue); }
-      .ledger-wrapper { display:grid; grid-template-columns: 1fr 1fr; gap:6px; background:var(--gold); padding:6px; overflow-y:auto; flex:1; border-radius:6px; }
+      .ledger-wrapper { display:grid; grid-template-columns: 1fr 1fr; gap:6px; background:var(--gold); padding:6px; overflow-y:auto; flex:1 1 auto; border-radius:6px; }
       .l-table { width:100%; border-collapse:collapse; background:#000; }
       .l-table td { border:0.5px solid #333; height:28px; text-align:center; font-size:14px; color:#fff; padding:2px 4px; }
       .l-num { width:40px; color:var(--gold); font-weight:bold; }
@@ -71,6 +73,7 @@
       .modal-btn { flex:1; padding:12px; border:none; font-weight:bold; border-radius:6px; color:white; cursor:pointer; }
       .msg-box { display:none; padding:10px; text-align:center; margin-bottom:10px; border-radius:6px; font-weight:bold; color:white; }
       @media (max-height:600px) { .key { min-height:36px; font-size:14px; } #display { height:40px; } }
+      @media (max-width:420px) { .container { padding:4px; } .nav-btn{ font-size:12px; } .key { font-size:14px; padding:10px 0; } }
     </style>
   </head>
 
@@ -99,7 +102,7 @@
         <div class="scroll-box" id="vItems"></div>
         <div class="total-banner" id="currentVoucherTotal">0 Ks</div>
 
-        <div class="keypad no-print">
+        <div class="keypad no-print" id="mainKeypad">
           <button class="key" onclick="k('ပါဝါ')">ပါဝါ</button>
           <button class="key" onclick="k('နတ်က္ခ')">နတ်က္ခ</button>
           <button class="key" onclick="k('အပူး')">အပူး</button>
@@ -112,6 +115,8 @@
 
           <button class="key" style="color:cyan" onclick="k('အပါ')">အပါ</button>
           <button class="key" style="color:cyan" onclick="k('အပူး+အပါ')">အပူး+အပါ</button>
+          <!-- Added missing button -->
+          <button class="key" style="background:#444; color:#fff" onclick="k('အပူးပါခွေ')">အပူးပါခွေ</button>
 
           <button class="key print-key" onclick="showPreview()">🖨 ထုတ်</button>
           <button class="key del-key" onclick="k('D')">⌫</button>
@@ -210,10 +215,19 @@
     </div>
 
     <script>
+      // --vh mobile fix: updates CSS variable so 100% height accounts for address bar
+      function setVh() {
+        document.documentElement.style.setProperty('--vh', (window.innerHeight * 0.01) + 'px');
+      }
+      window.addEventListener('resize', setVh);
+      setVh();
+
       // Firebase init
       const firebaseConfig = { databaseURL: "https://morn-405ac-default-rtdb.asia-southeast1.firebasedatabase.app/" };
-      firebase.initializeApp(firebaseConfig);
-      const db = firebase.database();
+      if(window.firebase && firebase.initializeApp) {
+        firebase.initializeApp(firebaseConfig);
+      }
+      const db = window.firebase && firebase.database ? firebase.database() : { ref: ()=>({ set: ()=>Promise.resolve(), on: ()=>{} }) };
 
       // Globals
       let masterData = Array(100).fill(0);
@@ -246,28 +260,33 @@
       function updateCloudLedger() {
         const total = masterData.reduce((a,b)=>a+b,0);
         const dataToUpload = { master: masterData, total: total, timestamp: Date.now(), lastUpdated: new Date().toLocaleString('my-MM'), syncedVia: "mobile" };
-        db.ref('amo_ledger').set(dataToUpload).then(()=> updateCloudStatus(true, "CLOUD SYNCED")).catch(err=> { updateCloudStatus(false, "CLOUD ERROR"); console.error(err); });
+        try {
+          db.ref('amo_ledger').set(dataToUpload).then(()=> updateCloudStatus(true, "CLOUD SYNCED")).catch(err=> { updateCloudStatus(false, "CLOUD ERROR"); console.error(err); });
+        } catch(e) { /* ignore if firebase not available */ }
       }
       function updateCloudStatus(isOnline, text) {
         const dot = document.getElementById('cloudDot'), textElem = document.getElementById('cloudText');
         if(isOnline) { dot.className="cloud-dot cloud-online"; textElem.textContent = "CLOUD: OK"; textElem.style.color="#00ff00"; }
         else { dot.className="cloud-dot cloud-offline"; textElem.textContent = text || "CLOUD: OFF"; textElem.style.color="#ff4444"; }
       }
-      db.ref(".info/connected").on("value",(snap)=> updateCloudStatus(snap.val()===true, snap.val() ? "CLOUD: ON" : "CLOUD: OFF"));
+      try { db.ref(".info/connected").on("value",(snap)=> updateCloudStatus(snap.val()===true, snap.val() ? "CLOUD: ON" : "CLOUD: OFF")); } catch(e){}
 
-      // Editable Preview
+      // Utility
+      function escapeHtml(s){ return (s+'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+      // Editable Preview (simplified & robust)
       function showPreview() {
         if(!currentVoucherItems.length){ showMessage("စာရင်းမရှိပါ", "error"); return; }
         const editArea = document.getElementById('previewEditArea');
         let editHTML = '<div style="margin-bottom:10px; background:#f0f0f0; padding:10px; border-radius:6px;">';
         editHTML += '<div style="color:black; font-weight:bold; margin-bottom:6px;">စာရင်းပြင်ဆင်ခြင်း:</div>';
         currentVoucherItems.forEach((item, index)=>{
-          editHTML += `<div style="display:grid; grid-template-columns:1.2fr 1fr 0.4fr 1.2fr 0.4fr 1.2fr 0.5fr; gap:6px; margin-bottom:6px;">
+          editHTML += `<div style="display:grid; grid-template-columns:1fr 1fr 60px 1fr 60px 1fr auto; gap:6px; margin-bottom:6px;">
             <input type="text" class="preview-edit-input" value="${escapeHtml(item.desc||'')}" onchange="currentVoucherItems[${index}].desc=this.value; updatePreview()" placeholder="နံပါတ်">
             <input type="text" class="preview-edit-input" value="${escapeHtml(item.logic||'')}" onchange="currentVoucherItems[${index}].logic=this.value; updatePreview()" placeholder="Logic">
-            <input type="text" class="preview-edit-input" value="${escapeHtml(item.r1||'')}" onchange="currentVoucherItems[${index}].r1=this.value; updatePreview()" placeholder="R" style="width:40px;">
+            <input type="text" class="preview-edit-input" value="${escapeHtml(item.r1||'')}" onchange="currentVoucherItems[${index}].r1=this.value; updatePreview()" placeholder="R" style="width:60px;">
             <input type="number" class="preview-edit-input preview-edit-amt" value="${item.amt1||''}" onchange="currentVoucherItems[${index}].amt1=this.value; updatePreview()" placeholder="Amount">
-            <input type="text" class="preview-edit-input" value="${escapeHtml(item.r2||'')}" onchange="currentVoucherItems[${index}].r2=this.value; updatePreview()" placeholder="R" style="width:40px;">
+            <input type="text" class="preview-edit-input" value="${escapeHtml(item.r2||'')}" onchange="currentVoucherItems[${index}].r2=this.value; updatePreview()" placeholder="R" style="width:60px;">
             <input type="number" class="preview-edit-input preview-edit-amt" value="${item.amt2||''}" onchange="currentVoucherItems[${index}].amt2=this.value; updatePreview()" placeholder="Amount">
             <button onclick="removePreviewItem(${index})" style="background:#ff4444; color:white; border:none; border-radius:4px; padding:6px;">✖</button>
           </div>`;
@@ -279,8 +298,6 @@
         updatePreview();
         document.getElementById('previewModal').style.display = 'flex';
       }
-
-      function escapeHtml(s){ return (s+'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
       function updatePreview() {
         const total = currentVoucherItems.reduce((s,i)=> s + calculateItemTotal(i), 0);
@@ -304,13 +321,14 @@
         showPreview();
       }
 
-      // History Edit
+      // History Edit helpers (kept simple)
       function openHistoryEdit(index) {
         editingHistoryIndex = index;
         const historyItem = voucherHistory[index];
+        if(!historyItem) return;
         let editHTML = `<div style="padding:10px;">
           <div style="margin-bottom:10px;"><label style="color:black; display:block; margin-bottom:5px;">အချိန်:</label>
-            <input type="text" id="editHistoryTime" value="${escapeHtml(historyItem.timestamp)}" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;"></div>
+            <input type="text" id="editHistoryTime" value="${escapeHtml(historyItem.timestamp||'')}" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;"></div>
           <div style="margin-bottom:10px;"><label style="color:black; display:block; margin-bottom:5px;">Status:</label>
             <select id="editHistoryStatus" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;">
               <option value="PENDING" ${historyItem.status==='PENDING'?'selected':''}>PENDING</option>
@@ -319,9 +337,9 @@
             </select></div>
           <div style="margin-bottom:15px; max-height:300px; overflow-y:auto;">
             <label style="color:black; display:block; margin-bottom:5px;">စာရင်းများ:</label>`;
-        historyItem.items.forEach((item,i)=>{
+        (historyItem.items||[]).forEach((item,i)=>{
           editHTML += `<div style="background:#f5f5f5; padding:8px; margin-bottom:6px; border-radius:4px;">
-            <div style="display:grid; grid-template-columns:1fr 1fr 0.5fr 1fr 0.5fr 1fr; gap:6px;">
+            <div style="display:grid; grid-template-columns:1fr 1fr 60px 1fr 60px 1fr; gap:6px;">
               <input type="text" value="${escapeHtml(item.desc||'')}" onchange="voucherHistory[${index}].items[${i}].desc=this.value" placeholder="နံပါတ်" style="padding:6px;">
               <input type="text" value="${escapeHtml(item.logic||'')}" onchange="voucherHistory[${index}].items[${i}].logic=this.value" placeholder="Logic" style="padding:6px;">
               <input type="text" value="${escapeHtml(item.r1||'')}" onchange="voucherHistory[${index}].items[${i}].r1=this.value" placeholder="R" style="padding:6px; width:60px;">
@@ -341,6 +359,7 @@
       }
 
       function removeHistoryItem(historyIndex, itemIndex) {
+        if(!voucherHistory[historyIndex]) return;
         if(confirm("ဒီစာရင်းကို ဖျက်မလား?")) {
           voucherHistory[historyIndex].items.splice(itemIndex,1);
           voucherHistory[historyIndex].total = voucherHistory[historyIndex].items.reduce((sum,item)=>sum+calculateItemTotal(item),0);
@@ -348,6 +367,7 @@
         }
       }
       function addNewHistoryItem(historyIndex) {
+        if(!voucherHistory[historyIndex]) return;
         voucherHistory[historyIndex].items.push({ desc:"", logic:"", r1:"", amt1:"", r2:"", amt2:"" });
         openHistoryEdit(historyIndex);
       }
@@ -418,7 +438,7 @@
       }
 
       function stopQRScanner(){
-        if(html5QrCode && html5QrCode.isScanning){
+        if(html5QrCode && html5QrCode.stop){
           html5QrCode.stop().then(()=> document.getElementById('qr-scanner-box').style.display='none').catch(()=> document.getElementById('qr-scanner-box').style.display='none');
         } else document.getElementById('qr-scanner-box').style.display='none';
       }
@@ -487,20 +507,18 @@
 
       function addPendingVoucherToLedger(){
         if(!pendingVoucherForLedger) return;
-        // Use batch update for performance
         pendingVoucherForLedger.items.forEach(item=>{
           addToLedgerReal(item.desc, item.logic, item.r1, item.amt1, item.r2, item.amt2);
         });
         const voucher = { id: Date.now(), timestamp: pendingVoucherForLedger.timestamp, items: pendingVoucherForLedger.items, total: pendingVoucherForLedger.total, status: "COMPLETED" };
         voucherHistory.unshift(voucher); if(voucherHistory.length>50) voucherHistory.pop(); saveHistory();
-        showMessage("✅ ဘောင်ချာပရင့်ထုတ်ပြီး လယ်ဂျာထဲထည့်ပြီးပါပြီ","success");
+        showMessage("✅ ဘောင်ချာပရင့်ထုတ��ပြီး လယ်ဂျာထဲထည့်ပြီးပါပြီ","success");
       }
 
       // NEW: Add current voucher directly to ledger WITHOUT printing
       function addToLedgerOnly(){
         if(!currentVoucherItems.length){ showMessage("စာရင်းမရှိပါ","error"); return; }
         const total = currentVoucherItems.reduce((s,i)=>s+calculateItemTotal(i),0);
-        // Add each item to ledger
         currentVoucherItems.forEach(item=>{
           addToLedgerReal(item.desc, item.logic, item.r1, item.amt1, item.r2, item.amt2);
         });
@@ -516,25 +534,26 @@
         let targets = [];
 
         if(!num && groups[logic]) {
-          // nothing - group logic without specific number not expected
+          // group logic without specific number not expected, but handle grouping by pushing group members
+          groups[logic]?.forEach(p=>targets.push(parseInt(p)));
         }
 
         if(logic === "ထိပ်" && num) {
           // first digit fixed: e.g num='12' take '1x' -> 10..19
-          const first = num.toString()[0];
+          const first = String(num)[0];
           for(let i=0;i<10;i++) targets.push(parseInt(first + i));
         } else if(logic === "ဘိတ်" && num) {
           // last digit fixed: e.g num='12' take 'x2' -> 02,12,...,92
-          const last = num.toString().slice(-1);
+          const last = String(num).slice(-1);
           for(let i=0;i<10;i++) targets.push(parseInt(i.toString() + last));
         } else if(logic === "ပွင့်" && num) {
           let s = parseInt(num) % 10;
           for(let i=0;i<100;i++) if((Math.floor(i/10)+(i%10))%10 === s) targets.push(i);
         } else if(logic === "ခွေ" && num) {
-          let d = num.toString().split('');
+          let d = String(num).split('');
           for(let i=0;i<d.length;i++) for(let j=0;j<d.length;j++) if(i!==j) targets.push(parseInt(d[i]+d[j]));
         } else if(logic === "အပူးပါခွေ" && num) {
-          let d = num.toString().split('');
+          let d = String(num).split('');
           for(let i=0;i<d.length;i++) for(let j=0;j<d.length;j++) targets.push(parseInt(d[i]+d[j]));
         } else if(logic === "အပါ" && num) {
           for(let i=0;i<10;i++){ targets.push(parseInt(num + i)); targets.push(parseInt(i + num)); }
@@ -542,7 +561,7 @@
         } else if(logic === "အပူး+အပါ" && num) {
           for(let i=0;i<10;i++){ targets.push(parseInt(num + i)); targets.push(parseInt(i + num)); }
         } else if(groups[logic] && num) {
-          filterGroupByDigit(groups[logic], num).forEach(p=>targets.push(parseInt(p)));
+          filterGroupByDigit(groups[logic], String(num)).forEach(p=>targets.push(parseInt(p)));
         } else if(groups[num]) {
           groups[num].forEach(p=>targets.push(parseInt(p)));
         } else if(num) {
@@ -551,7 +570,8 @@
 
         targets.forEach(idx=>{
           if(idx>=0 && idx<100){
-            let rev = parseInt(idx.toString().padStart(2,'0').split('').reverse().join(''));
+            const idxStr = String(idx).padStart(2,'0');
+            let rev = parseInt(idxStr.split('').reverse().join(''));
             let isDouble = (idx % 11 === 0);
 
             if(v1 > 0) {
@@ -581,9 +601,9 @@
         let v1 = parseInt(item.amt1) || 0, v2 = parseInt(item.amt2) || 0;
         let total = 0;
         if(item.logic === "ခွေ") {
-          total = (v1 + v2) * (item.desc.length * (item.desc.length - 1));
+          total = (v1 + v2) * (String(item.desc || '').length * (String(item.desc || '').length - 1));
         } else if(item.logic === "အပူးပါခွေ") {
-          total = (v1 + v2) * (item.desc.length * item.desc.length);
+          total = (v1 + v2) * (String(item.desc || '').length * String(item.desc || '').length);
         } else if(["ထိပ်","ဘိတ်","ပွင့်"].includes(item.logic)) {
           total = (v1 + v2) * 10;
         } else if(item.logic === "အပါ") {
@@ -593,7 +613,7 @@
         } else if(groups[item.desc]) {
           total = (v1 + v2) * groups[item.desc].length;
         } else if(groups[item.logic]) {
-          total = (v1 + v2) * filterGroupByDigit(groups[item.logic], item.desc).length;
+          total = (v1 + v2) * filterGroupByDigit(groups[item.logic], String(item.desc)).length;
         } else {
           if(item.r1 === "R" && item.r2 === "R") total = v1 + v2;
           else if(item.r1 === "R") total = v1 * 2;
@@ -604,7 +624,8 @@
       }
 
       function filterGroupByDigit(groupArr, digit) {
-        return groupArr.filter(n => n.includes(digit));
+        if(!digit) return [];
+        return groupArr.filter(n => n.includes(String(digit)));
       }
 
       // Initialization
@@ -632,6 +653,7 @@
         let tokens = txt.trim().split(/\s+/);
         let num="", logic="", r1="", amt1="", r2="", amt2="";
         let foundAmt1 = false;
+        const logicTokens = ["ထိပ်","ဘိတ်","ပွင့်","ခွေ","အပူးပါခွေ","အပူး+အပါ","ပါဝါ","နတ်က္ခ","အပူး","ညီကို","အပါ"];
         tokens.forEach(v=>{
           if(v === "") return;
           if(!isNaN(v)) {
@@ -640,7 +662,7 @@
             else amt2 = v;
           } else if(v === "R") {
             if(!foundAmt1) r1 = "R"; else r2 = "R";
-          } else if(["ထိပ်","ဘိတ်","ပွင့်","ခွေ","အပူးပါခွေ","ပါဝါ","နတ်က္ခ","အပူး","ညီကို","အပါ","အပူး+အပါ"].includes(v)) {
+          } else if(logicTokens.includes(v) || groups[v]) {
             logic = v;
           } else {
             // treat as description if unknown
@@ -743,8 +765,8 @@
       function renderHistoryList(){
         document.getElementById('historyList').innerHTML = voucherHistory.map((v,index)=> `
           <div class="history-item" style="background:#222; margin-bottom:8px; padding:8px; border-radius:6px; position:relative;">
-            <button class="history-edit-btn" style="position:absolute; top:8px; right:8px; background:var(--blue); color:white; border:none; border-radius:4px; padding:6px 8px;" onclick="openHistoryEdit(${index})">✏️ ပြင်</button>
-            <button class="history-delete-btn" style="position:absolute; top:8px; right:80px; background:var(--red); color:white; border:none; border-radius:4px; padding:6px 8px;" onclick="deleteHistory(${index})">🗑 ဖျက်</button>
+            <button class="history-edit-btn" style="position:absolute; top:8px; right:8px; background:var(--blue); color:white; border:none; border-radius:4px; padding:6px 8px;" onclick="openHistoryEdit(${index})">Edit</button>
+            <button class="history-delete-btn" style="position:absolute; top:8px; right:80px; background:var(--red); color:white; border:none; border-radius:4px; padding:6px 8px;" onclick="deleteHistory(${index})">Del</button>
             <div style="font-weight:bold; color:#fff">${escapeHtml(v.timestamp)}</div>
             <div style="font-size:12px; color:#ccc; margin-top:6px;">
               Total: ${v.total.toLocaleString()} Ks | Items: ${v.items.length} | Status: <span style="color:${v.status==='COMPLETED'?'#00ff00': v.status==='PRINTED_ONLY'?'#ffaa00':'#ccc'}">${v.status||'PENDING'}</span>
@@ -767,18 +789,18 @@
       }
 
       // Storage
-      function saveLedger() { localStorage.setItem('amo_ledger_v8', JSON.stringify(masterData)); }
-      function loadLedger() { const s = localStorage.getItem('amo_ledger_v8'); if(s) masterData = JSON.parse(s); }
-      function saveHistory() { localStorage.setItem('amo_history_v8', JSON.stringify(voucherHistory)); }
-      function loadHistory() { const s = localStorage.getItem('amo_history_v8'); if(s) voucherHistory = JSON.parse(s); renderHistoryList(); }
+      function saveLedger() { try{ localStorage.setItem('amo_ledger_v8', JSON.stringify(masterData)); }catch(e){} }
+      function loadLedger() { try{ const s = localStorage.getItem('amo_ledger_v8'); if(s) masterData = JSON.parse(s); }catch(e){} }
+      function saveHistory() { try{ localStorage.setItem('amo_history_v8', JSON.stringify(voucherHistory)); }catch(e){} }
+      function loadHistory() { try{ const s = localStorage.getItem('amo_history_v8'); if(s) voucherHistory = JSON.parse(s); renderHistoryList(); }catch(e){ renderHistoryList(); } }
 
       function resetAll(){ if(confirm("Data အကုန်ဖျက်မည် သေချာလား?\n(လယ်ဂျာနှင့် History အားလုံးပျက်မည်)")) {
-        masterData.fill(0); voucherHistory = []; currentVoucherItems = []; saveLedger(); saveHistory(); updateCloudLedger(); refreshLedger(); renderHistoryList(); renderVoucherList(); showMessage("စာရင်းအားလုံးဖျက်လိုက်ပါပြီ","success");
+        masterData.fill(0); voucherHistory = []; currentVoucherItems = []; saveLedger(); saveHistory(); updateCloudLedger(); refreshLedger(); renderHistoryList(); renderVoucherList(); showMessage("စနစ်အား အသစ်ဖျက်ပြီးပါပြီ","success");
       } }
 
       // Init & cleanup
       window.onload = init;
-      window.addEventListener('beforeunload', function(){ if(html5QrCode && html5QrCode.isScanning) html5QrCode.stop(); });
+      window.addEventListener('beforeunload', function(){ if(html5QrCode && html5QrCode.stop) html5QrCode.stop(); });
 
     </script>
   </body>
