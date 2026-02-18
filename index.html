@@ -1,925 +1,785 @@
 <!DOCTYPE html>
 <html lang="my">
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MASTER 2D AMO</title>
 
-    <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#3b82f6">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" href="manifest.json">
+    <!-- PWA Meta -->
+    <meta name="theme-color" content="#3b82f6" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="manifest" href="manifest.json" />
 
-    <!-- Auto-generated PWA Script -->
-<script>
-        // Register Service Worker
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js')
-                    .then(registration => {
-                        console.log('Service Worker registered:', registration);
-                    })
-                    .catch(error => {
-                        console.log('Service Worker registration failed:', error);
-                    });
-            });
-        }
-        
-        // Install Prompt
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            
-            // Show install button if not already installed
-            if (!window.matchMedia('(display-mode: standalone)').matches) {
-                showInstallButton();
-            }
-        });
-        
-        function showInstallButton() {
-            const installBtn = document.createElement('button');
-            installBtn.innerHTML = '<i class="fas fa-download"></i> Install App';
-            installBtn.style.cssText = `
-                position: fixed;
-                bottom: 20px;
-                right: 20px;
-                background: ${getComputedStyle(document.documentElement).getPropertyValue('--theme-color') || '#3b82f6'};
-                color: white;
-                border: none;
-                padding: 12px 24px;
-                border-radius: 50px;
-                font-weight: bold;
-                cursor: pointer;
-                box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-                z-index: 1000;
-            `;
-            
-            installBtn.addEventListener('click', async () => {
-                if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    const { outcome } = await deferredPrompt.userChoice;
-                    if (outcome === 'accepted') {
-                        installBtn.remove();
-                    }
-                    deferredPrompt = null;
-                }
-            });
-            
-            document.body.appendChild(installBtn);
-        }
-        
-        // Check if running as installed app
-        if (window.matchMedia('(display-mode: standalone)').matches) {
-            document.documentElement.classList.add('standalone');
-            console.log('Running as installed PWA!');
-        }
-</script>
+    <!-- External libs -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
-<style>
-        :root {
-            --theme-color: #3b82f6;
-        }
-        
-        .standalone body {
-            padding-top: env(safe-area-inset-top);
-        }
-        
-        /* App installed styles */
-        @media (display-mode: standalone) {
-            header {
-                padding-top: 20px;
-            }
-        }
-</style>
+    <style>
+      :root {
+        --theme-color: #3b82f6;
+        --gold: #D4AF37;
+        --bg: #000;
+        --red: #ff4444;
+        --green: #2e7d32;
+        --blue: #2196F3;
+        --purple: #9c27b0;
+      }
+      * { box-sizing: border-box; margin:0; padding:0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
+      html,body { height:100%; }
+      body { background: var(--bg); color: var(--gold); height: 100dvh; overflow: hidden; padding:0; }
+      .container { max-width:500px; margin:0 auto; height:100dvh; display:flex; flex-direction:column; border:1px solid var(--gold); padding:6px; }
+      .no-print { -webkit-print-color-adjust: exact; }
+      .header { display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--gold); padding:6px; height:40px; }
+      .header h2{ font-size:14px; color:var(--gold); margin:0; }
+      .cloud-status { font-size: 11px; display:flex; align-items:center; gap:6px; color:#888; }
+      .cloud-dot { width:8px; height:8px; border-radius:50%; }
+      .cloud-online { background:#00ff00; box-shadow:0 0 6px #00ff00; }
+      .cloud-offline { background:#ff4444; }
+      .top-nav { display:flex; gap:6px; margin:8px 0; }
+      .nav-btn { flex:1; padding:8px; background:#111; color:var(--gold); border:1px solid var(--gold); border-radius:6px; font-weight:bold; cursor:pointer; }
+      .nav-btn.active { background:var(--gold); color:#000; }
+      .layer { flex:1; display:none; flex-direction:column; overflow:hidden; }
+      .layer.active { display:flex; }
+      #display { width:100%; height:50px; background:#111; border:1px solid var(--gold); border-radius:6px; margin-bottom:6px; font-size:26px; color:#fff; text-align:center; outline:none; }
+      .v-header, .v-row { display:grid; grid-template-columns: 1.2fr 1fr 0.4fr 1.2fr 0.4fr 1.2fr 0.5fr; gap:4px; align-items:center; font-size:12px; }
+      .v-header { background:#222; padding:6px; color:#fff; border-radius:4px; }
+      .scroll-box { flex:1; overflow-y:auto; background:#080808; border:1px solid #222; padding:6px; border-radius:6px; }
+      .total-banner { padding:8px; background:var(--gold); color:#000; text-align:center; font-size:16px; font-weight:bold; margin:6px 0; border-radius:6px; }
+      .keypad { display:grid; grid-template-columns: repeat(4, 1fr); gap:6px; padding:6px 0; }
+      .key { background:#333; color:white; border:1px solid #444; padding:12px 0; border-radius:6px; font-weight:bold; font-size:16px; min-height:44px; cursor:pointer; }
+      .num-key { background:#1a1a1a; color:var(--gold); font-size:18px; }
+      .ent-key { background:var(--gold); color:#000; grid-column: span 3; }
+      .del-key { background:#b71c1c; }
+      .print-key { background:var(--blue); }
+      .ledger-wrapper { display:grid; grid-template-columns: 1fr 1fr; gap:6px; background:var(--gold); padding:6px; overflow-y:auto; flex:1; border-radius:6px; }
+      .l-table { width:100%; border-collapse:collapse; background:#000; }
+      .l-table td { border:0.5px solid #333; height:28px; text-align:center; font-size:14px; color:#fff; padding:2px 4px; }
+      .l-num { width:40px; color:var(--gold); font-weight:bold; }
+      .l-amt { text-align:right; padding-right:6px; color:#fff; }
+      .ledger-edit-input { width:100%; background:#000; color:#fff; border:1px solid var(--gold); text-align:right; font-size:14px; padding:4px; }
+      .control-panel { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-bottom:6px; }
+      .control-btn { padding:10px; border:none; border-radius:6px; font-weight:bold; color:white; font-size:13px; cursor:pointer; }
+      #qr-generator-box, #qr-scanner-box { padding:10px; border-radius:8px; margin-bottom:10px; }
+      #qr-generator-box { background:#fff; border:2px solid var(--gold); color:#000; }
+      #qr-scanner-box { background:#000; border:2px solid var(--gold); color:#fff; }
+      .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center; padding:20px; box-sizing:border-box; }
+      .modal-overlay .modal-box { background:#fff; width:100%; max-width:420px; max-height:80%; overflow-y:auto; padding:12px; border-radius:8px; }
+      .modal-btns { display:flex; gap:10px; margin-top:10px; width:100%; max-width:420px; }
+      .modal-btn { flex:1; padding:12px; border:none; font-weight:bold; border-radius:6px; color:white; cursor:pointer; }
+      .msg-box { display:none; padding:10px; text-align:center; margin-bottom:10px; border-radius:6px; font-weight:bold; color:white; }
+      @media (max-height:600px) { .key { min-height:36px; font-size:14px; } #display { height:40px; } }
+    </style>
   </head>
+
   <body>
-    <!DOCTYPE html>
-	<html lang="my">
-	  <head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-		<title>AMO 2D GOLDEN + QR SYNC</title>
-		<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
-		<script src="https://unpkg.com/html5-qrcode"></script>
-		<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-		<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-<style>
-        :root { --gold: #D4AF37; --bg: #000; --red: #ff4444; --green: #2e7d32; --blue: #2196F3; --purple: #9c27b0; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); color: var(--gold); height: 100dvh; overflow: hidden; position: fixed; width: 100%; padding: 0; }
-        .container { max-width: 500px; margin: 0 auto; height: 100dvh; display: flex; flex-direction: column; border: 1px solid var(--gold); padding: 2px; }
-        .hidden { display: none !important; }
-        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--gold); padding: 3px 5px; flex-shrink: 0; height: 30px; }
-        .header h2 { font-size: 12px; margin: 0; }
-        .top-nav { display: flex; gap: 3px; margin: 3px 0; flex-shrink: 0; height: 35px; }
-        .nav-btn { flex: 1; display:flex; align-items:center; justify-content:center; background: #222; color: var(--gold); border: 1px solid var(--gold); border-radius: 4px; font-weight: bold; font-size: 12px; }
-        .nav-btn.active { background: var(--gold); color: #000; }
-        .layer { flex: 1; display: none; flex-direction: column; overflow: hidden; }
-        .layer.active { display: flex; }
-        #display { width: 100%; height: 50px; background: #111; border: 1px solid var(--gold); border-radius: 4px; margin-bottom: 5px; font-size: 26px; color: #fff; text-align: center; outline: none; }
-        .v-header { display: grid; grid-template-columns: 1.2fr 1fr 0.4fr 1.2fr 0.4fr 1.2fr 0.5fr; background: #222; padding: 3px; font-size: 9px; text-align: center; color:#fff; border-bottom: 1px solid var(--gold); }
-        .v-row { display: grid; grid-template-columns: 1.2fr 1fr 0.4fr 1.2fr 0.4fr 1.2fr 0.5fr; padding: 4px 2px; border-bottom: 1px solid #333; font-size: 13px; text-align: center; color: #fff; align-items: center; }
-        .scroll-box { flex: 1; overflow-y: auto; background: #080808; border: 1px solid #333; }
-        .total-banner { padding: 6px; background: var(--gold); color: #000; text-align: center; font-size: 16px; font-weight: bold; margin: 2px 0; border-radius: 4px; }
-        .preview-edit-row { display: grid; grid-template-columns: 1.2fr 1fr 0.4fr 1.2fr 0.4fr 1.2fr 0.5fr; padding: 8px 4px; border-bottom: 1px solid #ddd; background: #f9f9f9; }
-        .preview-edit-input { width: 100%; padding: 4px; border: 1px solid #ccc; border-radius: 3px; text-align: center; font-size: 14px; }
-        .preview-edit-amt { text-align: right; }
-        .keypad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; padding: 3px 0; flex-shrink: 0; }
-        .key { background: #333; color: white; border: 1px solid #444; padding: 10px 0; border-radius: 4px; font-weight: bold; font-size: 16px; min-height: 45px; }
-        .key:active { background: #555; transform: translateY(1px); }
-        .num-key { background: #1a1a1a; color: var(--gold); font-size: 20px; } 
-        .ent-key { background: var(--gold); color: #000; grid-column: span 3; }
-        .del-key { background: #b71c1c; }
-        .print-key { background: var(--blue); }
-        .ledger-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: var(--gold); padding: 2px; overflow-y: auto; flex: 1; }
-        .l-table { width: 100%; border-collapse: collapse; background: #000; }
-        .l-table td { border: 0.5px solid #333; height: 25px; text-align: center; font-size: 14px; }
-        .l-num { width: 35px; color: var(--gold); font-weight: bold; border-right: 1px solid #333 !important; }
-        .l-amt { color: #fff; text-align: right; padding-right: 5px; }
-        .ledger-edit-input { width: 100%; background: #000; color: #fff; border: 1px solid var(--gold); text-align: right; font-size: 14px; }
-        .control-panel { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin-bottom: 5px; }
-        .control-btn { padding: 10px; border: none; border-radius: 5px; font-weight: bold; color: white; font-size: 12px; cursor: pointer; }
-        #qr-generator-box { background: #fff; padding: 10px; border-radius: 8px; text-align: center; margin-bottom: 10px; border: 2px solid var(--gold); }
-        #qr-scanner-box { background: #000; padding: 5px; border: 2px solid var(--gold); margin-bottom: 10px; }
-        .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:2000; align-items:center; justify-content:center; flex-direction: column; }
-        .modal-box { background: #fff; width: 90%; max-height: 80%; overflow-y: auto; padding: 10px; border-radius: 8px; }
-        .modal-btns { display: flex; gap: 10px; margin-top: 10px; width: 90%; }
-        .modal-btn { flex: 1; padding: 15px; border: none; font-weight: bold; border-radius: 5px; color: white; }
-        .history-item { background: #222; margin-bottom: 8px; padding: 10px; border-radius: 5px; position: relative; }
-        .history-edit-btn { position: absolute; top: 5px; right: 5px; background: var(--blue); color: white; border: none; border-radius: 3px; padding: 3px 8px; font-size: 11px; }
-        .history-delete-btn { position: absolute; top: 5px; right: 60px; background: var(--red); color: white; border: none; border-radius: 3px; padding: 3px 8px; font-size: 11px; }
-        .cloud-status { font-size: 9px; display: flex; align-items: center; }
-        .cloud-dot { width: 6px; height: 6px; border-radius: 50%; margin-right: 3px; }
-        .cloud-online { background: #00ff00; box-shadow: 0 0 5px #00ff00; }
-        .cloud-offline { background: #ff4444; }
-        .msg-box { display: none; padding: 10px; text-align: center; margin-bottom: 10px; border-radius: 5px; font-weight: bold; }
-        #previewCanvas { width: 100% !important; max-width: 400px !important; height: auto !important; border: 3px solid #333 !important; background: white !important; display: block !important; margin: 10px auto !important; }
-        @media (max-height: 600px) { .key { min-height: 35px; font-size: 14px; } #display { height: 40px; } }
-</style>
-	  </head>
-	  <body>
-		<div class="container">
-		  <div class="header no-print">
-			<h2>AMO 2D GOLDEN + QR SYNC</h2>
-			<div class="cloud-status" id="cloudStatus">
-			  <div class="cloud-dot cloud-offline" id="cloudDot"></div>
-			  <span id="cloudText" style="font-size:10px; color:#888;">CLOUD: OFF</span>
-			</div>
-		  </div>
-		  <div class="top-nav no-print">
-			<button class="nav-btn active" id="tab1" onclick="switchTab(1)">💸 အရောင်း</button>
-			<button class="nav-btn" id="tab2" onclick="switchTab(2)">📊 လယ်ဂျာ</button>
-			<button class="nav-btn" id="tab3" onclick="switchTab(3)">📜 History</button>
-		  </div>
-		  <div id="layer1" class="layer active">
-			<input type="text" id="display" placeholder="..." autocomplete="off">
-			<div class="v-header"><div>နံပါတ်</div><div>Logic</div><div>R</div><div>AMT</div><div>R</div><div>AMT</div><div>Del</div></div>
-			<div class="scroll-box" id="vItems"></div>
-			<div class="total-banner" id="currentVoucherTotal">0 Ks</div>
-			<div class="keypad no-print">
-			  <button class="key" onclick="k(' ပါဝါ ')">ပါဝါ</button><button class="key" onclick="k(' နတ်က္ခ ')">နတ်က္ခ</button>
-			  <button class="key" onclick="k(' အပူး ')">အပူး</button><button class="key" onclick="k(' ညီကို ')">ညီကို</button>
-			  <button class="key" onclick="k(' ထိပ် ')">ထိပ်</button><button class="key" onclick="k(' ဘိတ် ')">ဘိတ်</button>
-			  <button class="key" onclick="k(' ပွင့် ')">ပွင့်</button><button class="key" onclick="k(' ခွေ ')">ခွေ</button>
-			  <button class="key" style="color:cyan" onclick="k(' အပါ ')">အပါ</button><button class="key" style="color:cyan" onclick="k(' အပူး+အပါ ')">အပူး+အပါ</button>
-			  <button class="key print-key" onclick="showPreview()">🖨 ထုတ်</button><button class="key del-key" onclick="k('D')">⌫</button>
-			  <button class="key num-key" onclick="k('7')">7</button><button class="key num-key" onclick="k('8')">8</button><button class="key num-key" onclick="k('9')">9</button><button class="key" onclick="k(' R ')">R</button>
-			  <button class="key num-key" onclick="k('4')">4</button><button class="key num-key" onclick="k('5')">5</button><button class="key num-key" onclick="k('6')">6</button><button class="key" style="font-size:11px" onclick="k(' အပူးပါခွေ ')">အပူး/ခွေ</button>
-			  <button class="key num-key" onclick="k('1')">1</button><button class="key num-key" onclick="k('2')">2</button><button class="key num-key" onclick="k('3')">3</button><button class="key" onclick="k(' ')">Space</button>
-			  <button class="key num-key" onclick="k('0')">0</button><button class="key ent-key" onclick="k('E')">ENTER</button>
-			</div>
-		  </div>
-		  <div id="layer2" class="layer">
-			<div class="msg-box" id="msgBox"></div>
-			<div class="control-panel no-print">
-			  <button class="control-btn" style="background:var(--green);" onclick="generateQRCode()">📤 QR ထုတ်</button>
-			  <button class="control-btn" style="background:var(--blue);" onclick="startQRScanner()">📷 QR ဖတ်</button>
-			  <button class="control-btn" style="background:var(--purple);" id="editLedgerBtn" onclick="toggleLedgerEdit()">✏️ ပြင်</button>
-			</div>
-			<div id="qr-generator-box" class="hidden">
-			  <div style="color:black; font-weight:bold; margin-bottom:5px;">LEDGER QR CODE</div>
-			  <canvas id="qr-canvas"></canvas>
-			  <div style="margin-top:10px; display:flex; gap:5px; justify-content:center;">
-                <button onclick="saveQRCode()" style="padding:8px; background:black; color:white; border:none; border-radius:4px;">💾 Save</button>
-                <button onclick="closeQRBox()" style="padding:8px; background:red; color:white; border:none; border-radius:4px;">Close</button>
-			  </div>
-			</div>
-			<div id="qr-scanner-box" class="hidden">
-			  <div id="qr-reader" style="width:100%"></div>
-			  <button onclick="stopQRScanner()" style="width:100%; padding:10px; background:red; color:white; border:none; margin-top:5px;">Camera ပိတ်မည်</button>
-			</div>
-			<div id="qr-history" style="font-size:10px; color:#888; margin-bottom:5px; max-height:50px; overflow:auto;"></div>
-			<div class="ledger-wrapper" id="ledgerGrid"></div>
-			<div class="total-banner" id="t2">GRAND TOTAL: 0 Ks</div>
-			<button class="no-print" onclick="resetAll()" style="width:100%; padding:12px; background:var(--red); color:white; border:none; font-weight:bold; margin-top:5px;">🔄 RESET စာရင်းသစ်</button>
-		  </div>
-		  <div id="layer3" class="layer">
-			<div class="scroll-box" id="historyList" style="padding:5px;"></div>
-			<div class="total-banner" id="historyTotal">History: 0 ခု</div>
-		  </div>
-		</div>
-		<div id="previewModal" class="modal-overlay">
-		  <div style="color:white; margin-bottom:10px; font-weight:bold; text-align:center;">
-			<div>ဘောင်ချာ အစမ်းကြည့်ရှုခြင်း</div>
-			<div style="font-size:12px; color:#ccc; margin-top:5px;">စာရင်းကို ပြင်ဆင်နိုင်ပါသည်</div>
-		  </div>
-		  <div class="modal-box" id="previewContent">
-			<div id="previewEditArea" style="margin-bottom: 15px;"></div>
-			<canvas id="previewCanvas"></canvas>
-		  </div>
-		  <div class="modal-btns">
-			<button class="modal-btn" style="background:var(--red)" onclick="closePreview()">မထုတ်တော့ပါ</button>
-			<button class="modal-btn" style="background:var(--blue)" onclick="printReceiptOnly()">🖨 ပရင့်ထုတ်မည်</button>
-			<button class="modal-btn" style="background:var(--green)" onclick="printAndAddToLedger()">ထုတ်ပြီး လယ်ဂျာထည့်မည်</button>
-		  </div>
-		</div>
-		<div id="historyEditModal" class="modal-overlay">
-		  <div style="color:white; margin-bottom:10px; font-weight:bold; text-align:center;">History ပြင်ဆင်ခြင်း</div>
-		  <div class="modal-box" id="historyEditContent" style="color:black; max-width: 95%;"></div>
-		  <div class="modal-btns">
-			<button class="modal-btn" style="background:var(--red)" onclick="closeHistoryEdit()">မပြင်တော့ပါ</button>
-			<button class="modal-btn" style="background:var(--green)" onclick="saveHistoryEdit()">💾 သိမ်းမည်</button>
-		  </div>
-		</div>
-<script>
-// Firebase Config
-const firebaseConfig = { databaseURL: "https://morn-405ac-default-rtdb.asia-southeast1.firebasedatabase.app/" };
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
-// Global Variables
-let masterData = Array(100).fill(0);
-let currentVoucherItems = [];
-let voucherHistory = [];
-let ledgerEditMode = false;
-let html5QrCode = null;
-let pendingVoucherForLedger = null;
-let editingHistoryIndex = -1;
-
-const groups = {
-    "ပါဝါ": ["05","50","16","61","27","72","38","83","49","94"],
-    "နတ်က္ခ": ["07","70","18","81","24","42","35","53","69","96"],
-    "အပူး": ["00","11","22","33","44","55","66","77","88","99"],
-    "ညီကို": ["01","10","12","21","23","32","34","43","45","54","56","65","67","76","78","87","89","98","90","09"]
-};
-
-// Message Function
-function showMessage(msg, type = 'info') {
-    const box = document.getElementById('msgBox');
-    box.textContent = msg;
-    box.style.display = 'block';
-    box.style.background = type === 'error' ? '#b71c1c' : type === 'success' ? '#2e7d32' : type === 'warning' ? '#ff9800' : '#2196F3';
-    box.style.color = 'white';
-    setTimeout(() => { box.style.display = 'none'; }, 3000);
-}
-
-// Cloud Functions
-function updateCloudLedger() {
-    const total = masterData.reduce((a, b) => a + b, 0);
-    const dataToUpload = {
-        master: masterData,
-        total: total,
-        timestamp: Date.now(),
-        lastUpdated: new Date().toLocaleString('my-MM', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-        syncedVia: "mobile"
-    };
-    db.ref('amo_ledger').set(dataToUpload).then(() => {
-        updateCloudStatus(true, "CLOUD SYNCED");
-    }).catch(err => {
-        updateCloudStatus(false, "CLOUD ERROR");
-        console.error("Cloud update error:", err);
-    });
-}
-
-function updateCloudStatus(isOnline, text) {
-    const dot = document.getElementById('cloudDot');
-    const textElem = document.getElementById('cloudText');
-    if (isOnline) {
-        dot.className = "cloud-dot cloud-online";
-        textElem.textContent = "CLOUD: OK";
-        textElem.style.color = "#00ff00";
-    } else {
-        dot.className = "cloud-dot cloud-offline";
-        textElem.textContent = text || "CLOUD: OFF";
-        textElem.style.color = "#ff4444";
-    }
-}
-
-db.ref(".info/connected").on("value", (snap) => {
-    updateCloudStatus(snap.val() === true, snap.val() ? "CLOUD: ON" : "CLOUD: OFF");
-});
-
-// Editable Preview Functions
-function showPreview() {
-    if(!currentVoucherItems.length) { showMessage("စာရင်းမရှိပါ", "error"); return; }
-    const editArea = document.getElementById('previewEditArea');
-    let editHTML = '<div style="margin-bottom: 10px; background: #f0f0f0; padding: 10px; border-radius: 5px;">';
-    editHTML += '<div style="color: black; font-weight: bold; margin-bottom: 5px;">စာရင်းပြင်ဆင်ခြင်း:</div>';
-    currentVoucherItems.forEach((item, index) => {
-        editHTML += `<div class="preview-edit-row">
-            <input type="text" class="preview-edit-input" value="${item.desc || ''}" onchange="currentVoucherItems[${index}].desc = this.value; updatePreview()" placeholder="နံပါတ်">
-            <input type="text" class="preview-edit-input" value="${item.logic || ''}" onchange="currentVoucherItems[${index}].logic = this.value; updatePreview()" placeholder="Logic">
-            <input type="text" class="preview-edit-input" value="${item.r1 || ''}" onchange="currentVoucherItems[${index}].r1 = this.value; updatePreview()" placeholder="R" style="width:30px;">
-            <input type="number" class="preview-edit-input preview-edit-amt" value="${item.amt1 || ''}" onchange="currentVoucherItems[${index}].amt1 = this.value; updatePreview()" placeholder="Amount">
-            <input type="text" class="preview-edit-input" value="${item.r2 || ''}" onchange="currentVoucherItems[${index}].r2 = this.value; updatePreview()" placeholder="R" style="width:30px;">
-            <input type="number" class="preview-edit-input preview-edit-amt" value="${item.amt2 || ''}" onchange="currentVoucherItems[${index}].amt2 = this.value; updatePreview()" placeholder="Amount">
-            <button onclick="removePreviewItem(${index})" style="background: #ff4444; color: white; border: none; border-radius: 3px; padding: 3px 8px; font-size: 12px;">✖</button>
-        </div>`;
-    });
-    editHTML += `<div style="margin-top: 10px; text-align: center;">
-            <button onclick="addNewPreviewItem()" style="background: #4CAF50; color: white; border: none; padding: 8px 15px; border-radius: 4px; font-weight: bold;">➕ အသစ်ထည့်မည်</button>
-        </div></div>`;
-    editArea.innerHTML = editHTML;
-    updatePreview();
-    document.getElementById('previewModal').style.display = "flex";
-}
-
-function updatePreview() {
-    const total = currentVoucherItems.reduce((s, i) => s + calculateItemTotal(i), 0);
-    const canvas = drawReceipt(total);
-    const previewCanvas = document.getElementById('previewCanvas');
-    const ctx = previewCanvas.getContext('2d');
-    previewCanvas.width = canvas.width;
-    previewCanvas.height = canvas.height;
-    ctx.drawImage(canvas, 0, 0);
-}
-
-function removePreviewItem(index) {
-    if (confirm("ဒီစာရင်းကို ဖျက်မလား?")) {
-        currentVoucherItems.splice(index, 1);
-        showPreview();
-        renderVoucherList();
-    }
-}
-
-function addNewPreviewItem() {
-    currentVoucherItems.push({ id: Date.now(), desc: "", logic: "", r1: "", amt1: "", r2: "", amt2: "" });
-    showPreview();
-}
-
-// History Edit Functions
-function openHistoryEdit(index) {
-    editingHistoryIndex = index;
-    const historyItem = voucherHistory[index];
-    let editHTML = `<div style="padding: 10px;">
-        <div style="margin-bottom: 10px;"><label style="color: black; display: block; margin-bottom: 5px;">အချိန်:</label>
-        <input type="text" id="editHistoryTime" value="${historyItem.timestamp}" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"></div>
-        <div style="margin-bottom: 10px;"><label style="color: black; display: block; margin-bottom: 5px;">Status:</label>
-        <select id="editHistoryStatus" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-            <option value="PENDING" ${historyItem.status === 'PENDING' ? 'selected' : ''}>PENDING</option>
-            <option value="PRINTED_ONLY" ${historyItem.status === 'PRINTED_ONLY' ? 'selected' : ''}>PRINTED_ONLY</option>
-            <option value="COMPLETED" ${historyItem.status === 'COMPLETED' ? 'selected' : ''}>COMPLETED</option>
-        </select></div>
-        <div style="margin-bottom: 15px; max-height: 300px; overflow-y: auto;">
-            <label style="color: black; display: block; margin-bottom: 5px;">စာရင်းများ:</label>`;
-    historyItem.items.forEach((item, i) => {
-        editHTML += `<div style="background: #f5f5f5; padding: 8px; margin-bottom: 5px; border-radius: 3px;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr 0.5fr 1fr 0.5fr 1fr; gap: 5px;">
-                <input type="text" value="${item.desc || ''}" onchange="voucherHistory[${index}].items[${i}].desc = this.value" placeholder="နံပါတ်" style="padding: 4px;">
-                <input type="text" value="${item.logic || ''}" onchange="voucherHistory[${index}].items[${i}].logic = this.value" placeholder="Logic" style="padding: 4px;">
-                <input type="text" value="${item.r1 || ''}" onchange="voucherHistory[${index}].items[${i}].r1 = this.value" placeholder="R" style="padding: 4px; width: 40px;">
-                <input type="number" value="${item.amt1 || ''}" onchange="voucherHistory[${index}].items[${i}].amt1 = this.value" placeholder="Amount" style="padding: 4px;">
-                <input type="text" value="${item.r2 || ''}" onchange="voucherHistory[${index}].items[${i}].r2 = this.value" placeholder="R" style="padding: 4px; width: 40px;">
-                <input type="number" value="${item.amt2 || ''}" onchange="voucherHistory[${index}].items[${i}].amt2 = this.value" placeholder="Amount" style="padding: 4px;">
-            </div>
-            <button onclick="removeHistoryItem(${index}, ${i})" style="background: #ff4444; color: white; border: none; padding: 3px 8px; border-radius: 3px; margin-top: 5px; font-size: 11px;">ဖျက်မည်</button>
-        </div>`;
-    });
-    editHTML += `<button onclick="addNewHistoryItem(${index})" style="background: #4CAF50; color: white; border: none; padding: 8px 15px; border-radius: 4px; margin-top: 10px; width: 100%;">စာရင်းအသစ်ထည့်မည်</button>
+    <div class="container">
+      <div class="header no-print">
+        <h2>AMO 2D GOLDEN + QR SYNC</h2>
+        <div class="cloud-status" id="cloudStatus">
+          <div id="cloudDot" class="cloud-dot cloud-offline"></div>
+          <div id="cloudText">CLOUD: OFF</div>
         </div>
-        <div style="margin-bottom: 10px;"><label style="color: black; display: block; margin-bottom: 5px;">စုစုပေါင်း:</label>
-        <input type="number" id="editHistoryTotal" value="${historyItem.total}" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"></div></div>`;
-    document.getElementById('historyEditContent').innerHTML = editHTML;
-    document.getElementById('historyEditModal').style.display = "flex";
-}
+      </div>
 
-function removeHistoryItem(historyIndex, itemIndex) {
-    if (confirm("ဒီစာရင်းကို ဖျက်မလား?")) {
-        voucherHistory[historyIndex].items.splice(itemIndex, 1);
-        voucherHistory[historyIndex].total = voucherHistory[historyIndex].items.reduce((sum, item) => sum + calculateItemTotal(item), 0);
-        openHistoryEdit(historyIndex);
-    }
-}
+      <div class="top-nav no-print">
+        <button class="nav-btn active" id="tab1" onclick="switchTab(1)">💸 အရောင်း</button>
+        <button class="nav-btn" id="tab2" onclick="switchTab(2)">📊 လယ်ဂျာ</button>
+        <button class="nav-btn" id="tab3" onclick="switchTab(3)">📜 History</button>
+      </div>
 
-function addNewHistoryItem(historyIndex) {
-    voucherHistory[historyIndex].items.push({ desc: "", logic: "", r1: "", amt1: "", r2: "", amt2: "" });
-    openHistoryEdit(historyIndex);
-}
+      <!-- LAYER 1: Voucher Entry -->
+      <div id="layer1" class="layer active">
+        <input type="text" id="display" placeholder="..." autocomplete="off">
+        <div class="v-header">
+          <div>နံပါတ်</div><div>Logic</div><div>R</div><div>AMT</div><div>R</div><div>AMT</div><div>Del</div>
+        </div>
+        <div class="scroll-box" id="vItems"></div>
+        <div class="total-banner" id="currentVoucherTotal">0 Ks</div>
 
-function saveHistoryEdit() {
-    if (editingHistoryIndex >= 0) {
-        voucherHistory[editingHistoryIndex].timestamp = document.getElementById('editHistoryTime').value;
-        voucherHistory[editingHistoryIndex].status = document.getElementById('editHistoryStatus').value;
-        voucherHistory[editingHistoryIndex].total = parseInt(document.getElementById('editHistoryTotal').value) || 0;
-        saveHistory();
-        renderHistoryList();
-        showMessage("History ပြင်ဆင်ပြီးပါပြီ", "success");
-    }
-    closeHistoryEdit();
-}
+        <div class="keypad no-print">
+          <button class="key" onclick="k('ပါဝါ')">ပါဝါ</button>
+          <button class="key" onclick="k('နတ်က္ခ')">နတ်က္ခ</button>
+          <button class="key" onclick="k('အပူး')">အပူး</button>
+          <button class="key" onclick="k('ညီကို')">ညီကို</button>
 
-function closeHistoryEdit() {
-    document.getElementById('historyEditModal').style.display = "none";
-    editingHistoryIndex = -1;
-}
+          <button class="key" onclick="k('ထိပ်')">ထိပ်</button>
+          <button class="key" onclick="k('ဘိတ်')">ဘိတ်</button>
+          <button class="key" onclick="k('ပွင့်')">ပွင့်</button>
+          <button class="key" onclick="k('ခွေ')">ခွေ</button>
 
-function deleteHistory(index) {
-    if (confirm("ဒီ history ကို ဖျက်မလား?")) {
-        voucherHistory.splice(index, 1);
-        saveHistory();
-        renderHistoryList();
-        showMessage("History ဖျက်လိုက်ပါပြီ", "success");
-    }
-}
+          <button class="key" style="color:cyan" onclick="k('အပါ')">အပါ</button>
+          <button class="key" style="color:cyan" onclick="k('အပူး+အပါ')">အပူး+အပါ</button>
 
-// QR Scanner Functions
-function startQRScanner() {
-    if (!html5QrCode) html5QrCode = new Html5Qrcode("qr-reader");
-    document.getElementById('qr-generator-box').classList.add('hidden');
-    document.getElementById('qr-scanner-box').classList.remove('hidden');
-    document.getElementById('qr-reader').innerHTML = '';
-    const config = { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
-    html5QrCode.start({ facingMode: "environment" }, config, function(decodedText) {
-        handleQRScanResult(decodedText);
-    }, function(errorMessage) {
-        if (errorMessage.includes("NotAllowedError") || errorMessage.includes("PermissionDeniedError")) {
-            showMessage("Camera permission လိုအပ်ပါသည်", "error");
-        } else if (errorMessage.includes("NotFoundError") || errorMessage.includes("DevicesNotFoundError")) {
-            html5QrCode.start({ facingMode: "user" }, config, function(decodedText) {
-                handleQRScanResult(decodedText);
-            }, function(frontError) {
-                showMessage("ကင်မရာ မတွေ့ပါ", "error");
-                document.getElementById('qr-scanner-box').classList.add('hidden');
-            });
-        } else {
-            showMessage("Scanner error: " + errorMessage, "error");
-            document.getElementById('qr-scanner-box').classList.add('hidden');
+          <button class="key print-key" onclick="showPreview()">🖨 ထုတ်</button>
+          <button class="key del-key" onclick="k('D')">⌫</button>
+
+          <button class="key num-key" onclick="k('7')">7</button>
+          <button class="key num-key" onclick="k('8')">8</button>
+          <button class="key num-key" onclick="k('9')">9</button>
+          <button class="key num-key" onclick="k('4')">4</button>
+
+          <button class="key num-key" onclick="k('5')">5</button>
+          <button class="key num-key" onclick="k('6')">6</button>
+          <button class="key num-key" onclick="k('1')">1</button>
+          <button class="key num-key" onclick="k('2')">2</button>
+
+          <button class="key num-key" onclick="k('3')">3</button>
+          <button class="key num-key" onclick="k('0')">0</button>
+          <button class="key ent-key" onclick="k('E')">ENTER</button>
+        </div>
+      </div>
+
+      <!-- LAYER 2: Ledger / QR -->
+      <div id="layer2" class="layer">
+        <div class="msg-box" id="msgBox"></div>
+        <div class="control-panel no-print">
+          <button class="control-btn" style="background:var(--green);" onclick="generateQRCode()">📤 QR ထုတ်</button>
+          <button class="control-btn" style="background:var(--blue);" onclick="startQRScanner()">📷 QR ဖတ်</button>
+          <button class="control-btn" style="background:var(--purple);" id="editLedgerBtn" onclick="toggleLedgerEdit()">✏️ ပြင်</button>
+        </div>
+
+        <div id="qr-generator-box" class="hidden" style="display:none">
+          <div style="color:black; font-weight:bold; margin-bottom:5px;">LEDGER QR CODE</div>
+          <canvas id="qr-canvas"></canvas>
+          <div style="margin-top:10px; display:flex; gap:5px; justify-content:center;">
+            <button onclick="saveQRCode()" style="padding:8px; background:black; color:white; border:none; border-radius:4px;">💾 Save</button>
+            <button onclick="closeQRBox()" style="padding:8px; background:red; color:white; border:none; border-radius:4px;">Close</button>
+          </div>
+        </div>
+
+        <div id="qr-scanner-box" class="hidden" style="display:none">
+          <div id="qr-reader" style="width:100%;"></div>
+          <button onclick="stopQRScanner()" style="width:100%; padding:10px; background:red; color:white; border:none; margin-top:5px;">Camera ပိတ်မည်</button>
+        </div>
+
+        <div id="qr-history" style="font-size:10px; color:#888; margin-bottom:5px; max-height:50px; overflow:auto;"></div>
+
+        <div class="ledger-wrapper" id="ledgerGrid"></div>
+        <div class="total-banner" id="t2">GRAND TOTAL: 0 Ks</div>
+
+        <button class="no-print" onclick="resetAll()" style="width:100%; padding:12px; background:var(--red); color:white; border:none; font-weight:bold; margin-top:6px;">🔄 RESET စာရင်းအားလုံး</button>
+      </div>
+
+      <!-- LAYER 3: History -->
+      <div id="layer3" class="layer">
+        <div class="scroll-box" id="historyList" style="padding:6px;"></div>
+        <div class="total-banner" id="historyTotal">History: 0 ခု</div>
+      </div>
+    </div>
+
+    <!-- Preview Modal -->
+    <div id="previewModal" class="modal-overlay">
+      <div style="color:white; margin-bottom:10px; font-weight:bold; text-align:center;">
+        <div>ဘောင်ချာ အစမ်းကြည့်ရှုခြင်း</div>
+        <div style="font-size:12px; color:#ccc; margin-top:5px;">စာရင်းကို ပြင်ဆင်နိုင်ပါသည်</div>
+      </div>
+
+      <div class="modal-box" id="previewContent">
+        <div id="previewEditArea" style="margin-bottom: 12px;"></div>
+        <canvas id="previewCanvas" style="width:100%; border:3px solid #333; background:white;"></canvas>
+      </div>
+
+      <div class="modal-btns">
+        <button class="modal-btn" style="background:var(--red)" onclick="closePreview()">မထုတ်တော့ပါ</button>
+        <button class="modal-btn" style="background:var(--blue)" onclick="printReceiptOnly()">🖨 ပရင့်ထုတ်မည်</button>
+
+        <!-- NEW: Add-to-ledger-only button (no print) -->
+        <button class="modal-btn" style="background:#6c757d" onclick="addToLedgerOnly()">📥 လယ်ဂျာသိမ်းမည် (မပရင့်)</button>
+
+        <button class="modal-btn" style="background:var(--green)" onclick="printAndAddToLedger()">ထုတ်ပြီး လယ်ဂျာထည့်မည်</button>
+      </div>
+    </div>
+
+    <!-- History Edit Modal -->
+    <div id="historyEditModal" class="modal-overlay">
+      <div style="color:white; margin-bottom:10px; font-weight:bold; text-align:center;">History ပြင်ဆင်ခြင်း</div>
+      <div class="modal-box" id="historyEditContent" style="color:black; max-width: 95%;"></div>
+      <div class="modal-btns">
+        <button class="modal-btn" style="background:var(--red)" onclick="closeHistoryEdit()">မပြင်တော့ပါ</button>
+        <button class="modal-btn" style="background:var(--green)" onclick="saveHistoryEdit()">💾 သိမ်းမည်</button>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="text-align:center; padding:20px; margin-top:12px; font-size:14px; opacity:0.8;">
+      <p>📱 MASTER 2D AMO - PWA Web App</p>
+      <p>Created with HTML to Web App Converter</p>
+    </div>
+
+    <script>
+      // Firebase init
+      const firebaseConfig = { databaseURL: "https://morn-405ac-default-rtdb.asia-southeast1.firebasedatabase.app/" };
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.database();
+
+      // Globals
+      let masterData = Array(100).fill(0);
+      let currentVoucherItems = [];
+      let voucherHistory = [];
+      let ledgerEditMode = false;
+      let html5QrCode = null;
+      let pendingVoucherForLedger = null;
+      let editingHistoryIndex = -1;
+
+      const groups = {
+        "ပါဝါ": ["05","50","16","61","27","72","38","83","49","94"],
+        "နတ်က္ခ": ["07","70","18","81","24","42","35","53","69","96"],
+        "အပူး": ["00","11","22","33","44","55","66","77","88","99"],
+        "ညီကို": ["01","10","12","21","23","32","34","43","45","54","56","65","67","76","78","87","89","98","90","09"]
+      };
+
+      // Messaging
+      function showMessage(msg, type='info') {
+        const box = document.getElementById('msgBox');
+        box.textContent = msg;
+        box.style.display = 'block';
+        box.style.background = type === 'error' ? '#b71c1c' : type === 'success' ? '#2e7d32' : type === 'warning' ? '#ff9800' : '#2196F3';
+        box.style.color = 'white';
+        clearTimeout(box._t);
+        box._t = setTimeout(()=> box.style.display='none', 3000);
+      }
+
+      // Cloud status
+      function updateCloudLedger() {
+        const total = masterData.reduce((a,b)=>a+b,0);
+        const dataToUpload = { master: masterData, total: total, timestamp: Date.now(), lastUpdated: new Date().toLocaleString('my-MM'), syncedVia: "mobile" };
+        db.ref('amo_ledger').set(dataToUpload).then(()=> updateCloudStatus(true, "CLOUD SYNCED")).catch(err=> { updateCloudStatus(false, "CLOUD ERROR"); console.error(err); });
+      }
+      function updateCloudStatus(isOnline, text) {
+        const dot = document.getElementById('cloudDot'), textElem = document.getElementById('cloudText');
+        if(isOnline) { dot.className="cloud-dot cloud-online"; textElem.textContent = "CLOUD: OK"; textElem.style.color="#00ff00"; }
+        else { dot.className="cloud-dot cloud-offline"; textElem.textContent = text || "CLOUD: OFF"; textElem.style.color="#ff4444"; }
+      }
+      db.ref(".info/connected").on("value",(snap)=> updateCloudStatus(snap.val()===true, snap.val() ? "CLOUD: ON" : "CLOUD: OFF"));
+
+      // Editable Preview
+      function showPreview() {
+        if(!currentVoucherItems.length){ showMessage("စာရင်းမရှိပါ", "error"); return; }
+        const editArea = document.getElementById('previewEditArea');
+        let editHTML = '<div style="margin-bottom:10px; background:#f0f0f0; padding:10px; border-radius:6px;">';
+        editHTML += '<div style="color:black; font-weight:bold; margin-bottom:6px;">စာရင်းပြင်ဆင်ခြင်း:</div>';
+        currentVoucherItems.forEach((item, index)=>{
+          editHTML += `<div style="display:grid; grid-template-columns:1.2fr 1fr 0.4fr 1.2fr 0.4fr 1.2fr 0.5fr; gap:6px; margin-bottom:6px;">
+            <input type="text" class="preview-edit-input" value="${escapeHtml(item.desc||'')}" onchange="currentVoucherItems[${index}].desc=this.value; updatePreview()" placeholder="နံပါတ်">
+            <input type="text" class="preview-edit-input" value="${escapeHtml(item.logic||'')}" onchange="currentVoucherItems[${index}].logic=this.value; updatePreview()" placeholder="Logic">
+            <input type="text" class="preview-edit-input" value="${escapeHtml(item.r1||'')}" onchange="currentVoucherItems[${index}].r1=this.value; updatePreview()" placeholder="R" style="width:40px;">
+            <input type="number" class="preview-edit-input preview-edit-amt" value="${item.amt1||''}" onchange="currentVoucherItems[${index}].amt1=this.value; updatePreview()" placeholder="Amount">
+            <input type="text" class="preview-edit-input" value="${escapeHtml(item.r2||'')}" onchange="currentVoucherItems[${index}].r2=this.value; updatePreview()" placeholder="R" style="width:40px;">
+            <input type="number" class="preview-edit-input preview-edit-amt" value="${item.amt2||''}" onchange="currentVoucherItems[${index}].amt2=this.value; updatePreview()" placeholder="Amount">
+            <button onclick="removePreviewItem(${index})" style="background:#ff4444; color:white; border:none; border-radius:4px; padding:6px;">✖</button>
+          </div>`;
+        });
+        editHTML += `<div style="text-align:center; margin-top:6px;">
+            <button onclick="addNewPreviewItem()" style="background:#4CAF50; color:white; border:none; padding:8px 12px; border-radius:6px; font-weight:bold;">➕ အသစ်ထည့်မည်</button>
+        </div></div>`;
+        editArea.innerHTML = editHTML;
+        updatePreview();
+        document.getElementById('previewModal').style.display = 'flex';
+      }
+
+      function escapeHtml(s){ return (s+'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+      function updatePreview() {
+        const total = currentVoucherItems.reduce((s,i)=> s + calculateItemTotal(i), 0);
+        const cvs = drawReceipt(total);
+        const previewCanvas = document.getElementById('previewCanvas');
+        const ctx = previewCanvas.getContext('2d');
+        previewCanvas.width = cvs.width;
+        previewCanvas.height = cvs.height;
+        ctx.drawImage(cvs, 0, 0);
+      }
+
+      function removePreviewItem(index) {
+        if(confirm("ဒီစာရင်းကို ဖျက်မလား?")) {
+          currentVoucherItems.splice(index,1);
+          showPreview();
+          renderVoucherList();
         }
-    }).catch(err => {
-        showMessage("Scanner start failed: " + err.message, "error");
-        document.getElementById('qr-scanner-box').classList.add('hidden');
-    });
-}
+      }
+      function addNewPreviewItem() {
+        currentVoucherItems.push({ id: Date.now(), desc:"", logic:"", r1:"", amt1:"", r2:"", amt2:"" });
+        showPreview();
+      }
 
-function handleQRScanResult(decodedText) {
-    try {
-        const data = JSON.parse(decodedText);
-        if (data.type === "2D_LEDGER_SYNC" && Array.isArray(data.master) && data.master.length === 100) {
+      // History Edit
+      function openHistoryEdit(index) {
+        editingHistoryIndex = index;
+        const historyItem = voucherHistory[index];
+        let editHTML = `<div style="padding:10px;">
+          <div style="margin-bottom:10px;"><label style="color:black; display:block; margin-bottom:5px;">အချိန်:</label>
+            <input type="text" id="editHistoryTime" value="${escapeHtml(historyItem.timestamp)}" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;"></div>
+          <div style="margin-bottom:10px;"><label style="color:black; display:block; margin-bottom:5px;">Status:</label>
+            <select id="editHistoryStatus" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;">
+              <option value="PENDING" ${historyItem.status==='PENDING'?'selected':''}>PENDING</option>
+              <option value="PRINTED_ONLY" ${historyItem.status==='PRINTED_ONLY'?'selected':''}>PRINTED_ONLY</option>
+              <option value="COMPLETED" ${historyItem.status==='COMPLETED'?'selected':''}>COMPLETED</option>
+            </select></div>
+          <div style="margin-bottom:15px; max-height:300px; overflow-y:auto;">
+            <label style="color:black; display:block; margin-bottom:5px;">စာရင်းများ:</label>`;
+        historyItem.items.forEach((item,i)=>{
+          editHTML += `<div style="background:#f5f5f5; padding:8px; margin-bottom:6px; border-radius:4px;">
+            <div style="display:grid; grid-template-columns:1fr 1fr 0.5fr 1fr 0.5fr 1fr; gap:6px;">
+              <input type="text" value="${escapeHtml(item.desc||'')}" onchange="voucherHistory[${index}].items[${i}].desc=this.value" placeholder="နံပါတ်" style="padding:6px;">
+              <input type="text" value="${escapeHtml(item.logic||'')}" onchange="voucherHistory[${index}].items[${i}].logic=this.value" placeholder="Logic" style="padding:6px;">
+              <input type="text" value="${escapeHtml(item.r1||'')}" onchange="voucherHistory[${index}].items[${i}].r1=this.value" placeholder="R" style="padding:6px; width:60px;">
+              <input type="number" value="${item.amt1||''}" onchange="voucherHistory[${index}].items[${i}].amt1=this.value" placeholder="Amount" style="padding:6px;">
+              <input type="text" value="${escapeHtml(item.r2||'')}" onchange="voucherHistory[${index}].items[${i}].r2=this.value" placeholder="R" style="padding:6px; width:60px;">
+              <input type="number" value="${item.amt2||''}" onchange="voucherHistory[${index}].items[${i}].amt2=this.value" placeholder="Amount" style="padding:6px;">
+            </div>
+            <button onclick="removeHistoryItem(${index}, ${i})" style="background:#ff4444; color:white; border:none; padding:6px 8px; border-radius:4px; margin-top:6px;">ဖျက်</button>
+          </div>`;
+        });
+        editHTML += `<button onclick="addNewHistoryItem(${index})" style="background:#4CAF50; color:white; border:none; padding:8px 12px; border-radius:6px; width:100%;">စာရင်းအသစ်ထည့်မည်</button>
+          </div>
+          <div style="margin-bottom:10px;"><label style="color:black; display:block; margin-bottom:5px;">စုစုပေါင်း:</label>
+            <input type="number" id="editHistoryTotal" value="${historyItem.total||0}" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;"></div></div>`;
+        document.getElementById('historyEditContent').innerHTML = editHTML;
+        document.getElementById('historyEditModal').style.display = 'flex';
+      }
+
+      function removeHistoryItem(historyIndex, itemIndex) {
+        if(confirm("ဒီစာရင်းကို ဖျက်မလား?")) {
+          voucherHistory[historyIndex].items.splice(itemIndex,1);
+          voucherHistory[historyIndex].total = voucherHistory[historyIndex].items.reduce((sum,item)=>sum+calculateItemTotal(item),0);
+          openHistoryEdit(historyIndex);
+        }
+      }
+      function addNewHistoryItem(historyIndex) {
+        voucherHistory[historyIndex].items.push({ desc:"", logic:"", r1:"", amt1:"", r2:"", amt2:"" });
+        openHistoryEdit(historyIndex);
+      }
+      function saveHistoryEdit() {
+        if(editingHistoryIndex>=0){
+          voucherHistory[editingHistoryIndex].timestamp = document.getElementById('editHistoryTime').value;
+          voucherHistory[editingHistoryIndex].status = document.getElementById('editHistoryStatus').value;
+          voucherHistory[editingHistoryIndex].total = parseInt(document.getElementById('editHistoryTotal').value) || 0;
+          saveHistory();
+          renderHistoryList();
+          showMessage("History ပြင်ဆင်ပြီးပါပြီ","success");
+        }
+        closeHistoryEdit();
+      }
+      function closeHistoryEdit(){ document.getElementById('historyEditModal').style.display='none'; editingHistoryIndex=-1; }
+
+      function deleteHistory(index) {
+        if(confirm("ဒီ history ကို ဖျက်မလား?")) {
+          voucherHistory.splice(index,1);
+          saveHistory();
+          renderHistoryList();
+          showMessage("History ဖျက်လိုက်ပါပြီ","success");
+        }
+      }
+
+      // QR Scanner
+      function startQRScanner(){
+        if(!html5QrCode) html5QrCode = new Html5Qrcode("qr-reader");
+        document.getElementById('qr-generator-box').style.display='none';
+        document.getElementById('qr-scanner-box').style.display='block';
+        document.getElementById('qr-reader').innerHTML='';
+        const config = { fps:10, qrbox:{width:250,height:250}, aspectRatio:1.0 };
+        html5QrCode.start({ facingMode: "environment" }, config, decodedText => {
+          handleQRScanResult(decodedText);
+        }, errorMessage => {
+          if (errorMessage.includes("NotAllowedError") || errorMessage.includes("PermissionDeniedError")) {
+            showMessage("Camera permission လိုအပ်ပါသည်","error");
+          } else if (errorMessage.includes("NotFoundError") || errorMessage.includes("DevicesNotFoundError")) {
+            html5QrCode.start({ facingMode: "user" }, config, decodedText => handleQRScanResult(decodedText), frontError => {
+              showMessage("ကင်မရာ မတွေ့ပါ","error");
+              document.getElementById('qr-scanner-box').style.display='none';
+            });
+          } else {
+            showMessage("Scanner error: " + errorMessage,"error");
+            document.getElementById('qr-scanner-box').style.display='none';
+          }
+        }).catch(err=>{
+          showMessage("Scanner start failed: " + (err.message||err),"error");
+          document.getElementById('qr-scanner-box').style.display='none';
+        });
+      }
+
+      function handleQRScanResult(decodedText){
+        try {
+          const data = JSON.parse(decodedText);
+          if(data.type === "2D_LEDGER_SYNC" && Array.isArray(data.master) && data.master.length === 100){
             masterData = data.master;
-            saveLedger();
-            updateCloudLedger();
-            refreshLedger();
-            showMessage(`✅ QR ဖတ်ပြီး လယ်ဂျာအသစ်ထည့်ပြီးပါပြီ (Total: ${data.total.toLocaleString()} Ks)`, "success");
+            saveLedger(); updateCloudLedger(); refreshLedger();
+            showMessage(`✅ QR ဖတ်ပြီး လယ်ဂျာအသစ်ထည့်ပြီးပါပြီ (Total: ${data.total.toLocaleString()} Ks)`,"success");
             addQRHistory("QR ဖတ်ခဲ့သည် - " + (data.date || new Date().toLocaleDateString()));
             stopQRScanner();
-        } else {
-            showMessage("ဒီ QR က AMO 2D စာရင်းမဟုတ်ပါ", "error");
+          } else {
+            showMessage("ဒီ QR က AMO 2D စာရင်းမဟုတ်ပါ","error");
+          }
+        } catch(e){
+          showMessage("QR ဖတ်မရပါ - ဒေတာမှားယွင်းနေသည်","error");
         }
-    } catch (e) {
-        showMessage("QR ဖတ်မရပါ - ဒေတာမှားယွင်းနေသည်", "error");
-    }
-}
+      }
 
-function stopQRScanner() {
-    if (html5QrCode && html5QrCode.isScanning) {
-        html5QrCode.stop().then(() => {
-            document.getElementById('qr-scanner-box').classList.add('hidden');
-        }).catch(err => {
-            document.getElementById('qr-scanner-box').classList.add('hidden');
+      function stopQRScanner(){
+        if(html5QrCode && html5QrCode.isScanning){
+          html5QrCode.stop().then(()=> document.getElementById('qr-scanner-box').style.display='none').catch(()=> document.getElementById('qr-scanner-box').style.display='none');
+        } else document.getElementById('qr-scanner-box').style.display='none';
+      }
+
+      function closeQRBox(){ document.getElementById('qr-generator-box').style.display='none'; }
+
+      // Receipt drawing
+      function drawReceipt(total){
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const width = 400, lineHeight = 28;
+        let y = 40;
+        const h = 200 + (Math.max(3, currentVoucherItems.length) * lineHeight);
+        canvas.width = width; canvas.height = h;
+        ctx.fillStyle = "#fff"; ctx.fillRect(0,0,width,h); ctx.fillStyle="#000";
+        ctx.textAlign="center"; ctx.font = "bold 26px sans-serif";
+        ctx.fillText("AMO 2D GOLDEN", width/2, y); y += 35;
+        ctx.font = "18px sans-serif"; ctx.fillText("2D Voucher", width/2, y); y += 30;
+        ctx.beginPath(); ctx.moveTo(30,y); ctx.lineTo(width-30,y); ctx.strokeStyle="#000"; ctx.lineWidth=2; ctx.stroke(); y += 30;
+        ctx.textAlign="left"; ctx.font = "bold 18px sans-serif";
+        ctx.fillText("No", 40, y); ctx.fillText("Logic", 100, y); ctx.fillText("R", 170, y); ctx.fillText("AMT", 190, y); ctx.fillText("R", 260, y); ctx.fillText("AMT", 280, y); y += 28;
+        ctx.font = "17px sans-serif";
+        currentVoucherItems.forEach((item)=>{
+          if(item.desc) { ctx.fillStyle="#000080"; ctx.fillText(item.desc, 40, y); }
+          if(item.logic) { ctx.fillStyle="#0000FF"; ctx.fillText(item.logic, 100, y); }
+          if(item.r1 === "R") { ctx.fillStyle="#FF0000"; ctx.fillText("R", 170, y); }
+          if(item.amt1) { ctx.fillStyle="#006400"; ctx.fillText(parseInt(item.amt1||0).toLocaleString(), 210, y); }
+          if(item.r2 === "R") { ctx.fillStyle="#FF0000"; ctx.fillText("R", 260, y); }
+          if(item.amt2) { ctx.fillStyle="#006400"; ctx.fillText(parseInt(item.amt2||0).toLocaleString(), 300, y); }
+          ctx.fillStyle="#000"; y += lineHeight;
         });
-    } else {
-        document.getElementById('qr-scanner-box').classList.add('hidden');
-    }
-}
+        y += 10; ctx.beginPath(); ctx.moveTo(30,y); ctx.lineTo(width-30,y); ctx.strokeStyle="#000"; ctx.lineWidth=2; ctx.stroke(); y += 35;
+        ctx.textAlign="center"; ctx.font="bold 24px sans-serif"; ctx.fillStyle="#000"; ctx.fillText("TOTAL:", width/2 - 50, y);
+        ctx.font="bold 26px sans-serif"; ctx.fillStyle="#FF0000"; ctx.fillText(total.toLocaleString() + " Ks", width/2 + 60, y); y += 35;
+        ctx.font="18px sans-serif"; ctx.fillStyle="#0000FF"; ctx.fillText("ကျေးဇူးတင်ပါသည်", width/2, y);
+        return canvas;
+      }
 
-function closeQRBox() { document.getElementById('qr-generator-box').classList.add('hidden'); }
+      // Print & ledger operations
+      function printReceiptOnly(){
+        if(!currentVoucherItems.length){ showMessage("စာရင်းမရှိပါ","error"); return; }
+        let total = currentVoucherItems.reduce((s,i)=>s+calculateItemTotal(i),0);
+        const voucher = { id: Date.now(), timestamp: new Date().toLocaleString('my-MM',{ year: 'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }), items: JSON.parse(JSON.stringify(currentVoucherItems)), total: total, status: "PRINTED_ONLY" };
+        voucherHistory.unshift(voucher); if(voucherHistory.length>50) voucherHistory.pop(); saveHistory();
+        const cvs = drawReceipt(total); const link = document.createElement('a'); link.download = `Voucher_${Date.now()}.png`; link.href = cvs.toDataURL(); link.click();
+        showMessage("✅ ဘောင်ချာ ပရင့်ထုတ်ပြီးပါပြီ","success");
+        currentVoucherItems = []; renderVoucherList(); document.getElementById('previewModal').style.display='none'; renderHistoryList();
+      }
 
-// Receipt Function
-function drawReceipt(total) {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    const width = 400, lineHeight = 25;
-    let y = 40;
-    const h = 200 + (currentVoucherItems.length * lineHeight);
-    canvas.width = width; canvas.height = h;
-    ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, width, h); ctx.fillStyle = "#000";
-    ctx.textAlign = "center"; ctx.font = "bold 26px 'Pyidaungsu', sans-serif";
-    ctx.fillText("AMO 2D GOLDEN", width/2, y); y += 35;
-    ctx.font = "18px 'Pyidaungsu', sans-serif"; ctx.fillText("2D Voucher", width/2, y); y += 25;
-    ctx.beginPath(); ctx.moveTo(30, y); ctx.lineTo(width - 30, y); ctx.strokeStyle = "#000"; ctx.lineWidth = 2; ctx.stroke(); y += 30;
-    ctx.textAlign = "left"; ctx.font = "bold 18px 'Pyidaungsu', sans-serif";
-    ctx.fillText("No", 40, y); ctx.fillText("Logic", 100, y); ctx.fillText("R", 170, y); ctx.fillText("AMT", 190, y); ctx.fillText("R", 260, y); ctx.fillText("AMT", 280, y); y += 25;
-    ctx.font = "17px 'Pyidaungsu', sans-serif";
-    currentVoucherItems.forEach((item, index) => {
-        if(item.desc) { ctx.fillStyle = "#000080"; ctx.fillText(item.desc, 40, y); }
-        if(item.logic) { ctx.fillStyle = "#0000FF"; ctx.fillText(item.logic, 100, y); }
-        if(item.r1 === "R") { ctx.fillStyle = "#FF0000"; ctx.fillText("R", 170, y); }
-        if(item.amt1) { ctx.fillStyle = "#006400"; ctx.fillText(parseInt(item.amt1).toLocaleString(), 210, y); }
-        if(item.r2 === "R") { ctx.fillStyle = "#FF0000"; ctx.fillText("R", 260, y); }
-        if(item.amt2) { ctx.fillStyle = "#006400"; ctx.fillText(parseInt(item.amt2).toLocaleString(), 300, y); }
-        ctx.fillStyle = "#000000"; y += lineHeight;
-    });
-    y += 10; ctx.beginPath(); ctx.moveTo(30, y); ctx.lineTo(width - 30, y); ctx.strokeStyle = "#000000"; ctx.lineWidth = 2; ctx.stroke(); y += 35;
-    ctx.textAlign = "center"; ctx.font = "bold 24px 'Pyidaungsu', sans-serif"; ctx.fillStyle = "#000000"; ctx.fillText("TOTAL:", width/2 - 50, y);
-    ctx.font = "bold 26px 'Pyidaungsu', sans-serif"; ctx.fillStyle = "#FF0000"; ctx.fillText(total.toLocaleString() + " Ks", width/2 + 60, y); y += 35;
-    ctx.font = "18px 'Pyidaungsu', sans-serif"; ctx.fillStyle = "#0000FF"; ctx.fillText("ကျေးဇူးတင်ပါသည်", width/2, y);
-    return canvas;
-}
-
-// Print Functions
-function printReceiptOnly() {
-    let total = currentVoucherItems.reduce((s,i)=>s+calculateItemTotal(i),0);
-    const voucher = { id: Date.now(), timestamp: new Date().toLocaleString('my-MM', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }), items: [...currentVoucherItems], total: total, status: "PRINTED_ONLY" };
-    voucherHistory.unshift(voucher); if(voucherHistory.length > 50) voucherHistory.pop(); saveHistory();
-    let cvs = drawReceipt(total); const link = document.createElement('a'); link.download = `Voucher_${Date.now()}.png`; link.href = cvs.toDataURL(); link.click();
-    showMessage("✅ ဘောင်ချာ ပရင့်ထုတ်ပြီးပါပြီ", "success");
-    currentVoucherItems = []; renderVoucherList(); document.getElementById('previewModal').style.display = "none"; renderHistoryList();
-}
-
-function printAndAddToLedger() {
-    let total = currentVoucherItems.reduce((s,i)=>s+calculateItemTotal(i),0);
-    let cvs = drawReceipt(total); const link = document.createElement('a'); link.download = `Voucher_${Date.now()}.png`; link.href = cvs.toDataURL(); link.click();
-    pendingVoucherForLedger = { items: [...currentVoucherItems], total: total, timestamp: new Date().toLocaleString('my-MM', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) };
-    setTimeout(() => {
-        if(confirm("ဘောင်ချာ ပရင့်ထုတ်ပြီးပါပြီ။ လယ်ဂျာထဲ ထည့်မလား?")) {
+      function printAndAddToLedger(){
+        if(!currentVoucherItems.length){ showMessage("စာရင်းမရှိပါ","error"); return; }
+        let total = currentVoucherItems.reduce((s,i)=>s+calculateItemTotal(i),0);
+        const cvs = drawReceipt(total); const link = document.createElement('a'); link.download = `Voucher_${Date.now()}.png`; link.href = cvs.toDataURL(); link.click();
+        pendingVoucherForLedger = { items: JSON.parse(JSON.stringify(currentVoucherItems)), total: total, timestamp: new Date().toLocaleString('my-MM',{ year: 'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }) };
+        setTimeout(()=>{
+          if(confirm("ဘောင်ချာ ပရင့်ထုတ်ပြီးပါပြီ။ လယ်ဂျာထဲ ထည့်မလား?")){
             addPendingVoucherToLedger();
-        } else {
+          } else {
             const voucher = { id: Date.now(), timestamp: pendingVoucherForLedger.timestamp, items: pendingVoucherForLedger.items, total: pendingVoucherForLedger.total, status: "PRINTED_ONLY" };
-            voucherHistory.unshift(voucher); if(voucherHistory.length > 50) voucherHistory.pop(); saveHistory();
-            showMessage("📄 ဘောင်ချာသာ သိမ်းဆည်းထားပါသည်", "warning");
-        }
-        currentVoucherItems = []; renderVoucherList(); document.getElementById('previewModal').style.display = "none"; renderHistoryList(); pendingVoucherForLedger = null;
-    }, 800);
-}
+            voucherHistory.unshift(voucher); if(voucherHistory.length>50) voucherHistory.pop(); saveHistory();
+            showMessage("📄 ဘောင်ချာသာ သိမ်းဆည်းထားပါသည်","warning");
+          }
+          currentVoucherItems = []; renderVoucherList(); document.getElementById('previewModal').style.display='none'; renderHistoryList(); pendingVoucherForLedger = null;
+        }, 800);
+      }
 
-function addPendingVoucherToLedger() {
-    if (!pendingVoucherForLedger) return;
-    pendingVoucherForLedger.items.forEach(item => { addToLedgerReal(item.desc, item.logic, item.r1, item.amt1, item.r2, item.amt2); });
-    const voucher = { id: Date.now(), timestamp: pendingVoucherForLedger.timestamp, items: pendingVoucherForLedger.items, total: pendingVoucherForLedger.total, status: "COMPLETED" };
-    voucherHistory.unshift(voucher); if(voucherHistory.length > 50) voucherHistory.pop(); saveHistory();
-    showMessage("✅ ဘောင်ချာပရင့်ထုတ်ပြီး လယ်ဂျာထဲထည့်ပြီးပါပြီ", "success");
-}
-
-// ==================== LEDGER FUNCTIONS (FIXED) ====================
-function addToLedgerReal(num, logic, r1, amt1, r2, amt2) {
-    let v1 = parseInt(amt1) || 0, v2 = parseInt(amt2) || 0;
-    let targets = [];
-    
-    if(logic === "ထိပ်") for(let i=0; i<10; i++) targets.push(parseInt(num[0]+i));
-    else if(logic === "ဘိတ်") for(let i=0; i<10; i++) targets.push(parseInt(i+num[num.length-1]));
-    else if(logic === "ပွင့်") { let s=parseInt(num)%10; for(let i=0; i<100; i++) if((Math.floor(i/10)+(i%10))%10===s) targets.push(i); }
-    else if(logic === "ခွေ") { let d=num.split(''); for(let i=0; i<d.length; i++) for(let j=0; j<d.length; j++) if(i!==j) targets.push(parseInt(d[i]+d[j])); }
-    else if(logic === "အပူးပါခွေ") { let d=num.split(''); for(let i=0; i<d.length; i++) for(let j=0; j<d.length; j++) targets.push(parseInt(d[i]+d[j])); }
-    else if(logic === "အပါ") { for(let i=0; i<10; i++) { targets.push(parseInt(num+i)); targets.push(parseInt(i+num)); } targets = [...new Set(targets)]; }
-    else if(logic === "အပူး+အပါ") for(let i=0; i<10; i++) { targets.push(parseInt(num+i)); targets.push(parseInt(i+num)); }
-    else if(groups[logic] && num) filterGroupByDigit(groups[logic], num).forEach(p => targets.push(parseInt(p)));
-    else if(groups[num]) groups[num].forEach(p => targets.push(parseInt(p)));
-    else if(num) targets.push(parseInt(num));
-
-    // --- FIXED: R should apply to the reverse index (rev) only.
-    targets.forEach(idx => {
-        if(idx>=0 && idx<100) {
-            let rev = parseInt(idx.toString().padStart(2,'0').split('').reverse().join(''));
-            let isDouble = (idx%11===0);
-            
-            // First amount (v1)
-            if (v1 > 0) {
-                if (r1 === "R") {
-                    // Apply to reverse index only (unless double number where rev === idx)
-                    if (isDouble) {
-                        masterData[idx] += v1;
-                    } else {
-                        masterData[rev] += v1;
-                    }
-                } else {
-                    // Normal: apply to the index
-                    masterData[idx] += v1;
-                }
-            }
-
-            // Second amount (v2)
-            if (v2 > 0) {
-                if (r2 === "R") {
-                    // Apply to reverse index only (unless double number where rev === idx)
-                    if (isDouble) {
-                        masterData[idx] += v2;
-                    } else {
-                        masterData[rev] += v2;
-                    }
-                } else {
-                    // Normal: apply to the index
-                    masterData[idx] += v2;
-                }
-            }
-        }
-    });
-    
-    saveLedger();
-    refreshLedger();
-    updateCloudLedger();
-}
-
-// ==================== CALCULATE ITEM TOTAL (FIXED) ====================
-function calculateItemTotal(item) {
-    let v1 = parseInt(item.amt1) || 0;
-    let v2 = parseInt(item.amt2) || 0;
-    let total = 0;
-    
-    if (item.logic === "ခွေ") {
-        total = (v1 + v2) * (item.desc.length * (item.desc.length - 1));
-    }
-    else if (item.logic === "အပူးပါခွေ") {
-        total = (v1 + v2) * (item.desc.length * item.desc.length);
-    }
-    else if (["ထိပ်","ဘိတ်","ပွင့်"].includes(item.logic)) {
-        total = (v1 + v2) * 10;
-    }
-    else if (item.logic === "အပါ") {
-        total = (v1 + v2) * 19;
-    }
-    else if (item.logic === "အပူး+အပါ") {
-        total = (v1 + v2) * 20;
-    }
-    else if (groups[item.desc]) {
-        total = (v1 + v2) * groups[item.desc].length;
-    }
-    else if (groups[item.logic]) {
-        total = (v1 + v2) * filterGroupByDigit(groups[item.logic], item.desc).length;
-    }
-    else {
-        // Normal number - Simple calculation
-        if (item.r1 === "R" && item.r2 === "R") {
-            total = v1 + v2;
-        } else if (item.r1 === "R") {
-            total = v1 * 2;
-        } else if (item.r2 === "R") {
-            total = v1 + v2;
-        } else {
-            total = v1 + v2;
-        }
-    }
-    return total;
-}
-
-function filterGroupByDigit(groupArr, digit) { 
-    return groupArr.filter(n => n.includes(digit)); 
-}
-
-// App Initialization
-function init() {
-    let h = '<div><table class="l-table">';
-    for(let i = 0; i < 100; i++) {
-        if(i === 50) h += '</table></div><div><table class="l-table">';
-        h += `<tr><td class="l-num">${i.toString().padStart(2,'0')}</td><td id="c-${i}" class="l-amt"></td></tr>`;
-    }
-    document.getElementById('ledgerGrid').innerHTML = h + '</table></div>';
-    loadHistory();
-    loadLedger();
-    refreshLedger();
-}
-
-// UI Functions
-function k(v) {
-    let display = document.getElementById('display');
-    if(v === 'D') display.value = display.value.slice(0, -1);
-    else if(v === 'E') { if(display.value) processInput(display.value); display.value = ""; }
-    else display.value += v;
-    display.scrollLeft = display.scrollWidth;
-}
-
-function processInput(txt) {
-    let tokens = txt.trim().split(/\s+/);
-    let num = "", logic = "", r1 = "", amt1 = "", r2 = "", amt2 = "";
-    let foundAmt1 = false;
-    tokens.forEach(v => {
-        if (!isNaN(v) && v !== "") {
-            if (num === "" && !groups[logic]) num = v; 
-            else if (!foundAmt1) { amt1 = v; foundAmt1 = true; }
-            else amt2 = v;
-        } else if (v === "R") { if (!foundAmt1) r1 = "R"; else r2 = "R"; } 
-                else if (["ထိပ်","ဘိတ်","ပွင့်","ခွေ","အပူးပါခွေ","ပါဝါ","နတ်က္ခ","အပူး","ညီကို","အပါ","အပူး+အပါ"].includes(v)) logic = v;
-    });
-    if ((num !== "" || groups[logic]) && (amt1 !== "" || amt2 !== "")) {
-        currentVoucherItems.push({ 
-            id: Date.now(), 
-            desc: (num || logic), 
-            logic: (num ? logic : ''), 
-            r1: r1, 
-            amt1: amt1, 
-            r2: r2, 
-            amt2: amt2 
+      function addPendingVoucherToLedger(){
+        if(!pendingVoucherForLedger) return;
+        // Use batch update for performance
+        pendingVoucherForLedger.items.forEach(item=>{
+          addToLedgerReal(item.desc, item.logic, item.r1, item.amt1, item.r2, item.amt2);
         });
-        renderVoucherList();
-    }
-}
+        const voucher = { id: Date.now(), timestamp: pendingVoucherForLedger.timestamp, items: pendingVoucherForLedger.items, total: pendingVoucherForLedger.total, status: "COMPLETED" };
+        voucherHistory.unshift(voucher); if(voucherHistory.length>50) voucherHistory.pop(); saveHistory();
+        showMessage("✅ ဘောင်ချာပရင့်ထုတ်ပြီး လယ်ဂျာထဲထည့်ပြီးပါပြီ","success");
+      }
 
-function renderVoucherList() {
-    let html = "";
-    currentVoucherItems.forEach((item, index) => {
-        html += `<div class="v-row">
-            <div>${item.desc}</div><div>${item.logic}</div>
-            <div style="color:red">${item.r1}</div><div>${item.amt1}</div>
-            <div style="color:red">${item.r2}</div><div>${item.amt2}</div>
+      // NEW: Add current voucher directly to ledger WITHOUT printing
+      function addToLedgerOnly(){
+        if(!currentVoucherItems.length){ showMessage("စာရင်းမရှိပါ","error"); return; }
+        const total = currentVoucherItems.reduce((s,i)=>s+calculateItemTotal(i),0);
+        // Add each item to ledger
+        currentVoucherItems.forEach(item=>{
+          addToLedgerReal(item.desc, item.logic, item.r1, item.amt1, item.r2, item.amt2);
+        });
+        const voucher = { id: Date.now(), timestamp: new Date().toLocaleString('my-MM',{ year: 'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }), items: JSON.parse(JSON.stringify(currentVoucherItems)), total: total, status: "COMPLETED" };
+        voucherHistory.unshift(voucher); if(voucherHistory.length>50) voucherHistory.pop(); saveHistory();
+        showMessage("✅ လယ်ဂျာထဲသိမ်းပြီးပါပြီ (မပရင့်)","success");
+        currentVoucherItems = []; renderVoucherList(); document.getElementById('previewModal').style.display='none'; renderHistoryList();
+      }
+
+      // ==================== LEDGER FUNCTIONS (FIXED) ====================
+      function addToLedgerReal(num, logic, r1, amt1, r2, amt2){
+        let v1 = parseInt(amt1) || 0, v2 = parseInt(amt2) || 0;
+        let targets = [];
+
+        if(!num && groups[logic]) {
+          // nothing - group logic without specific number not expected
+        }
+
+        if(logic === "ထိပ်" && num) {
+          // first digit fixed: e.g num='12' take '1x' -> 10..19
+          const first = num.toString()[0];
+          for(let i=0;i<10;i++) targets.push(parseInt(first + i));
+        } else if(logic === "ဘိတ်" && num) {
+          // last digit fixed: e.g num='12' take 'x2' -> 02,12,...,92
+          const last = num.toString().slice(-1);
+          for(let i=0;i<10;i++) targets.push(parseInt(i.toString() + last));
+        } else if(logic === "ပွင့်" && num) {
+          let s = parseInt(num) % 10;
+          for(let i=0;i<100;i++) if((Math.floor(i/10)+(i%10))%10 === s) targets.push(i);
+        } else if(logic === "ခွေ" && num) {
+          let d = num.toString().split('');
+          for(let i=0;i<d.length;i++) for(let j=0;j<d.length;j++) if(i!==j) targets.push(parseInt(d[i]+d[j]));
+        } else if(logic === "အပူးပါခွေ" && num) {
+          let d = num.toString().split('');
+          for(let i=0;i<d.length;i++) for(let j=0;j<d.length;j++) targets.push(parseInt(d[i]+d[j]));
+        } else if(logic === "အပါ" && num) {
+          for(let i=0;i<10;i++){ targets.push(parseInt(num + i)); targets.push(parseInt(i + num)); }
+          targets = [...new Set(targets)];
+        } else if(logic === "အပူး+အပါ" && num) {
+          for(let i=0;i<10;i++){ targets.push(parseInt(num + i)); targets.push(parseInt(i + num)); }
+        } else if(groups[logic] && num) {
+          filterGroupByDigit(groups[logic], num).forEach(p=>targets.push(parseInt(p)));
+        } else if(groups[num]) {
+          groups[num].forEach(p=>targets.push(parseInt(p)));
+        } else if(num) {
+          targets.push(parseInt(num));
+        }
+
+        targets.forEach(idx=>{
+          if(idx>=0 && idx<100){
+            let rev = parseInt(idx.toString().padStart(2,'0').split('').reverse().join(''));
+            let isDouble = (idx % 11 === 0);
+
+            if(v1 > 0) {
+              if(r1 === "R") {
+                if(isDouble) masterData[idx] += v1;
+                else masterData[rev] += v1;
+              } else {
+                masterData[idx] += v1;
+              }
+            }
+            if(v2 > 0) {
+              if(r2 === "R") {
+                if(isDouble) masterData[idx] += v2;
+                else masterData[rev] += v2;
+              } else {
+                masterData[idx] += v2;
+              }
+            }
+          }
+        });
+
+        saveLedger(); refreshLedger(); updateCloudLedger();
+      }
+
+      // ==================== CALCULATE ITEM TOTAL ====================
+      function calculateItemTotal(item){
+        let v1 = parseInt(item.amt1) || 0, v2 = parseInt(item.amt2) || 0;
+        let total = 0;
+        if(item.logic === "ခွေ") {
+          total = (v1 + v2) * (item.desc.length * (item.desc.length - 1));
+        } else if(item.logic === "အပူးပါခွေ") {
+          total = (v1 + v2) * (item.desc.length * item.desc.length);
+        } else if(["ထိပ်","ဘိတ်","ပွင့်"].includes(item.logic)) {
+          total = (v1 + v2) * 10;
+        } else if(item.logic === "အပါ") {
+          total = (v1 + v2) * 19;
+        } else if(item.logic === "အပူး+အပါ") {
+          total = (v1 + v2) * 20;
+        } else if(groups[item.desc]) {
+          total = (v1 + v2) * groups[item.desc].length;
+        } else if(groups[item.logic]) {
+          total = (v1 + v2) * filterGroupByDigit(groups[item.logic], item.desc).length;
+        } else {
+          if(item.r1 === "R" && item.r2 === "R") total = v1 + v2;
+          else if(item.r1 === "R") total = v1 * 2;
+          else if(item.r2 === "R") total = v1 + v2;
+          else total = v1 + v2;
+        }
+        return total;
+      }
+
+      function filterGroupByDigit(groupArr, digit) {
+        return groupArr.filter(n => n.includes(digit));
+      }
+
+      // Initialization
+      function init(){
+        let h = '<div><table class="l-table">';
+        for(let i=0;i<100;i++){
+          if(i===50) h += '</table></div><div><table class="l-table">';
+          h += `<tr><td class="l-num">${i.toString().padStart(2,'0')}</td><td id="c-${i}" class="l-amt"></td></tr>`;
+        }
+        h += '</table></div>';
+        document.getElementById('ledgerGrid').innerHTML = h;
+        loadHistory(); loadLedger(); refreshLedger();
+      }
+
+      // UI functions
+      function k(v){
+        let display = document.getElementById('display');
+        if(v === 'D') display.value = display.value.slice(0,-1);
+        else if(v === 'E') { if(display.value) processInput(display.value); display.value = ""; }
+        else display.value += (display.value ? ' ' : '') + v;
+        display.scrollLeft = display.scrollWidth;
+      }
+
+      function processInput(txt){
+        let tokens = txt.trim().split(/\s+/);
+        let num="", logic="", r1="", amt1="", r2="", amt2="";
+        let foundAmt1 = false;
+        tokens.forEach(v=>{
+          if(v === "") return;
+          if(!isNaN(v)) {
+            if(num === "" && !groups[v]) num = v;
+            else if(!foundAmt1) { amt1 = v; foundAmt1 = true; }
+            else amt2 = v;
+          } else if(v === "R") {
+            if(!foundAmt1) r1 = "R"; else r2 = "R";
+          } else if(["ထိပ်","ဘိတ်","ပွင့်","ခွေ","အပူးပါခွေ","ပါဝါ","နတ်က္ခ","အပူး","ညီကို","အပါ","အပူး+အပါ"].includes(v)) {
+            logic = v;
+          } else {
+            // treat as description if unknown
+            if(!num) num = v;
+          }
+        });
+
+        if((num !== "" || groups[logic]) && (amt1 !== "" || amt2 !== "")){
+          currentVoucherItems.push({
+            id: Date.now(),
+            desc: (num || logic),
+            logic: (num ? logic : ''),
+            r1: r1,
+            amt1: amt1,
+            r2: r2,
+            amt2: amt2
+          });
+          renderVoucherList();
+        } else {
+          showMessage("Invalid input format","error");
+        }
+      }
+
+      function renderVoucherList(){
+        let html = "";
+        currentVoucherItems.forEach((item,index)=>{
+          html += `<div class="v-row">
+            <div>${escapeHtml(item.desc||'')}</div><div>${escapeHtml(item.logic||'')}</div>
+            <div style="color:red">${escapeHtml(item.r1||'')}</div><div>${item.amt1||''}</div>
+            <div style="color:red">${escapeHtml(item.r2||'')}</div><div>${item.amt2||''}</div>
             <div style="color:red;cursor:pointer" onclick="removeItem(${index})">✖</div>
-        </div>`;
-    });
-    document.getElementById('vItems').innerHTML = html;
-    updateCurrentVoucherTotal();
-}
+          </div>`;
+        });
+        document.getElementById('vItems').innerHTML = html;
+        updateCurrentVoucherTotal();
+      }
+      function removeItem(index){ currentVoucherItems.splice(index,1); renderVoucherList(); }
 
-function removeItem(index) { 
-    currentVoucherItems.splice(index, 1); 
-    renderVoucherList(); 
-}
+      function updateCurrentVoucherTotal(){
+        let total = currentVoucherItems.reduce((sum,item)=> sum + calculateItemTotal(item), 0);
+        document.getElementById('currentVoucherTotal').innerText = `${total.toLocaleString()} Ks`;
+      }
 
-function updateCurrentVoucherTotal() {
-    let total = currentVoucherItems.reduce((sum, item) => sum + calculateItemTotal(item), 0);
-    document.getElementById('currentVoucherTotal').innerText = `${total.toLocaleString()} Ks`;
-}
-
-function refreshLedger() {
-    let total = 0;
-    for(let i=0; i<100; i++) {
-        const cell = document.getElementById('c-' + i);
-        if(cell) {
-            if(ledgerEditMode) {
-                cell.innerHTML = `<input type="number" id="le-${i}" value="${masterData[i]}" class="ledger-edit-input" onchange="masterData[${i}]=parseInt(this.value)||0; saveLedger(); updateCloudLedger();">`;
+      function refreshLedger(){
+        let total = 0;
+        for(let i=0;i<100;i++){
+          const cell = document.getElementById('c-'+i);
+          if(cell){
+            if(ledgerEditMode){
+              cell.innerHTML = `<input type="number" id="le-${i}" value="${masterData[i]}" class="ledger-edit-input" onchange="masterData[${i}] = parseInt(this.value)||0; saveLedger(); updateCloudLedger(); refreshLedger();">`;
             } else {
-                cell.innerText = masterData[i]>0 ? masterData[i].toLocaleString() : "";
+              cell.innerText = masterData[i] > 0 ? masterData[i].toLocaleString() : "";
             }
             total += masterData[i];
+          }
         }
-    }
-    document.getElementById('t2').innerText = `GRAND TOTAL: ${total.toLocaleString()} Ks`;
-}
+        document.getElementById('t2').innerText = `GRAND TOTAL: ${total.toLocaleString()} Ks`;
+      }
 
-function toggleLedgerEdit() {
-    ledgerEditMode = !ledgerEditMode;
-    const btn = document.getElementById('editLedgerBtn');
-    if(ledgerEditMode) { 
-        btn.innerHTML = "💾 Save"; 
-        btn.style.background = "#2e7d32"; 
-    } else { 
-        btn.innerHTML = "✏️ ပြင်"; 
-        btn.style.background = "#9c27b0"; 
-        saveLedger(); 
-        updateCloudLedger();
-    }
-    refreshLedger();
-}
+      function toggleLedgerEdit(){
+        ledgerEditMode = !ledgerEditMode;
+        const btn = document.getElementById('editLedgerBtn');
+        if(ledgerEditMode){ btn.innerHTML = "💾 Save"; btn.style.background = "#2e7d32"; }
+        else { btn.innerHTML = "✏️ ပြင်"; btn.style.background = "#9c27b0"; saveLedger(); updateCloudLedger(); }
+        refreshLedger();
+      }
 
-function closePreview() { 
-    document.getElementById('previewModal').style.display = "none"; 
-}
+      function closePreview(){ document.getElementById('previewModal').style.display='none'; }
 
-// QR Code Functions
-function generateQRCode() {
-    const total = masterData.reduce((a, b) => a + b, 0);
-    if(total === 0) { 
-        showMessage("စာရင်းမရှိသေးပါ", "error"); 
-        return; 
-    }
-    
-    const data = { 
-        type: "2D_LEDGER_SYNC", 
-        date: new Date().toLocaleString('my-MM', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-        }), 
-        total: total, 
-        master: masterData, 
-        timestamp: Date.now(),
-        device: "mobile"
-    };
-    
-    const qrCanvas = document.getElementById('qr-canvas');
-    QRCode.toCanvas(qrCanvas, JSON.stringify(data), { 
-        width: 200, 
-        margin: 2,
-        color: {
-            dark: '#000000',
-            light: '#FFFFFF'
-        }
-    }, function(error) {
-        if (error) { 
-            showMessage("QR ထုတ်ရာတွင် အမှားတစ်ခုဖြစ်နေသည်", "error"); 
-            return; 
-        }
-        document.getElementById('qr-generator-box').classList.remove('hidden');
-        document.getElementById('qr-scanner-box').classList.add('hidden');
-        addQRHistory("QR ထုတ်ခဲ့သည် - " + new Date().toLocaleTimeString());
-    });
-}
+      // QR functions
+      function generateQRCode(){
+        const total = masterData.reduce((a,b)=>a+b,0);
+        if(total === 0){ showMessage("စာရင်းမရှိသေးပါ","error"); return; }
+        const data = { type:"2D_LEDGER_SYNC", date: new Date().toLocaleString('my-MM'), total: total, master: masterData, timestamp: Date.now(), device:"mobile" };
+        const qrCanvas = document.getElementById('qr-canvas');
+        QRCode.toCanvas(qrCanvas, JSON.stringify(data), { width:200, margin:2, color:{ dark:'#000000', light:'#FFFFFF' } }, function(error){
+          if(error){ showMessage("QR ထုတ်ရာတွင် အမှားတစ်ခုဖြစ်နေသည်","error"); return; }
+          document.getElementById('qr-generator-box').style.display='block';
+          document.getElementById('qr-scanner-box').style.display='none';
+          addQRHistory("QR ထုတ်ခဲ့သည် - " + new Date().toLocaleTimeString());
+        });
+      }
+      function saveQRCode(){
+        const canvas = document.getElementById('qr-canvas');
+        const link = document.createElement('a');
+        link.download = `amo_qr_${Date.now()}.png`;
+        link.href = canvas.toDataURL();
+        link.click();
+        showMessage("QR သိမ်းပြီးပါပြီ","success");
+      }
+      function addQRHistory(text){
+        const d = document.getElementById('qr-history');
+        const e = document.createElement('div');
+        e.textContent = text;
+        d.prepend(e);
+        if(d.children.length > 5) d.removeChild(d.lastChild);
+      }
 
-function saveQRCode() {
-    const canvas = document.getElementById('qr-canvas');
-    const link = document.createElement('a');
-    link.download = `amo_qr_${Date.now()}.png`;
-    link.href = canvas.toDataURL(); 
-    link.click();
-    showMessage("QR သိမ်းပြီးပါပြီ", "success");
-}
-
-function addQRHistory(text) {
-    const d = document.getElementById('qr-history');
-    const e = document.createElement('div'); 
-    e.textContent = text;
-    d.prepend(e); 
-    if (d.children.length > 5) d.removeChild(d.lastChild);
-}
-
-// Utility Functions
-function renderHistoryList() {
-    document.getElementById('historyList').innerHTML = voucherHistory.map((v, index) => `
-        <div class="history-item">
-            <button class="history-edit-btn" onclick="openHistoryEdit(${index})">✏️ ပြင်</button>
-            <button class="history-delete-btn" onclick="deleteHistory(${index})">🗑 ဖျက်</button>
-            
-            <div style="font-weight:bold; color:#fff">${v.timestamp}</div>
-            <div style="font-size:12px; color:#ccc; margin-top: 5px;">
-                Total: ${v.total.toLocaleString()} Ks | 
-                Items: ${v.items.length} | 
-                Status: <span style="color:${v.status === 'COMPLETED' ? '#00ff00' : 
-                                      v.status === 'PRINTED_ONLY' ? '#ffaa00' : '#ccc'}">
-                    ${v.status || 'PENDING'}
-                </span>
+      // History rendering
+      function renderHistoryList(){
+        document.getElementById('historyList').innerHTML = voucherHistory.map((v,index)=> `
+          <div class="history-item" style="background:#222; margin-bottom:8px; padding:8px; border-radius:6px; position:relative;">
+            <button class="history-edit-btn" style="position:absolute; top:8px; right:8px; background:var(--blue); color:white; border:none; border-radius:4px; padding:6px 8px;" onclick="openHistoryEdit(${index})">✏️ ပြင်</button>
+            <button class="history-delete-btn" style="position:absolute; top:8px; right:80px; background:var(--red); color:white; border:none; border-radius:4px; padding:6px 8px;" onclick="deleteHistory(${index})">🗑 ဖျက်</button>
+            <div style="font-weight:bold; color:#fff">${escapeHtml(v.timestamp)}</div>
+            <div style="font-size:12px; color:#ccc; margin-top:6px;">
+              Total: ${v.total.toLocaleString()} Ks | Items: ${v.items.length} | Status: <span style="color:${v.status==='COMPLETED'?'#00ff00': v.status==='PRINTED_ONLY'?'#ffaa00':'#ccc'}">${v.status||'PENDING'}</span>
             </div>
-            <div style="font-size:11px; color:#888; margin-top: 3px;">
-                ${v.items.map(item => 
-                    `${item.desc || ''} ${item.logic || ''} ${item.amt1 || ''}${item.r1 ? 'R' : ''} ${item.amt2 || ''}${item.r2 ? 'R' : ''}`
-                ).join(', ')}
+            <div style="font-size:11px; color:#888; margin-top:6px;">
+              ${v.items.map(item => `${item.desc||''} ${item.logic||''} ${item.amt1||''}${item.r1? 'R':''} ${item.amt2||''}${item.r2? 'R':''}`).join(', ')}
             </div>
-        </div>
-    `).join('');
-    document.getElementById('historyTotal').innerText = `History: ${voucherHistory.length} ခု`;
-}
+          </div>
+        `).join('');
+        document.getElementById('historyTotal').innerText = `History: ${voucherHistory.length} ခု`;
+      }
 
-function switchTab(n) { 
-    document.querySelectorAll('.layer').forEach(l=>l.classList.remove('active')); 
-    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active')); 
-    document.getElementById('layer'+n).classList.add('active'); 
-    document.getElementById('tab'+n).classList.add('active'); 
-    if(n===2) refreshLedger(); 
-    if(n===3) renderHistoryList();
-}
+      function switchTab(n){
+        document.querySelectorAll('.layer').forEach(l=> l.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b=> b.classList.remove('active'));
+        document.getElementById('layer'+n).classList.add('active');
+        document.getElementById('tab'+n).classList.add('active');
+        if(n===2) refreshLedger();
+        if(n===3) renderHistoryList();
+      }
 
-function saveLedger() { 
-    localStorage.setItem('amo_ledger_v8', JSON.stringify(masterData)); 
-}
+      // Storage
+      function saveLedger() { localStorage.setItem('amo_ledger_v8', JSON.stringify(masterData)); }
+      function loadLedger() { const s = localStorage.getItem('amo_ledger_v8'); if(s) masterData = JSON.parse(s); }
+      function saveHistory() { localStorage.setItem('amo_history_v8', JSON.stringify(voucherHistory)); }
+      function loadHistory() { const s = localStorage.getItem('amo_history_v8'); if(s) voucherHistory = JSON.parse(s); renderHistoryList(); }
 
-function loadLedger() { 
-    const s = localStorage.getItem('amo_ledger_v8'); 
-    if(s) masterData = JSON.parse(s); 
-}
+      function resetAll(){ if(confirm("Data အကုန်ဖျက်မည် သေချာလား?\n(လယ်ဂျာနှင့် History အားလုံးပျက်မည်)")) {
+        masterData.fill(0); voucherHistory = []; currentVoucherItems = []; saveLedger(); saveHistory(); updateCloudLedger(); refreshLedger(); renderHistoryList(); renderVoucherList(); showMessage("စာရင်းအားလုံးဖျက်လိုက်ပါပြီ","success");
+      } }
 
-function saveHistory() { 
-    localStorage.setItem('amo_history_v8', JSON.stringify(voucherHistory)); 
-}
+      // Init & cleanup
+      window.onload = init;
+      window.addEventListener('beforeunload', function(){ if(html5QrCode && html5QrCode.isScanning) html5QrCode.stop(); });
 
-function loadHistory() { 
-    const s = localStorage.getItem('amo_history_v8'); 
-    if(s) voucherHistory = JSON.parse(s); 
-    renderHistoryList(); 
-}
-
-function resetAll() { 
-    if(confirm("Data အကုန်ဖျက်မည် သေချာလား?\n(လယ်ဂျာနှင့် History အားလုံးပျက်မည်)")) { 
-        masterData.fill(0); 
-        voucherHistory = []; 
-        currentVoucherItems = [];
-        saveLedger(); 
-        saveHistory(); 
-        updateCloudLedger();
-        refreshLedger(); 
-        renderHistoryList();
-        renderVoucherList();
-        showMessage("စာရင်းအားလုံးဖျက်လိုက်ပါပြီ", "success");
-    }
-}
-
-// Initialize app
-window.onload = init;
-
-// Clean up scanner on page unload
-window.addEventListener('beforeunload', function() {
-    if (html5QrCode && html5QrCode.isScanning) {
-        html5QrCode.stop();
-    }
-});
-</script>
-
-
-
-		<!-- Auto-generated PWA Footer -->
-		<div style="text-align: center; padding: 20px; margin-top: 40px; font-size: 14px; opacity: 0.8;">
-		  <p>📱 MASTER 2D AMO - PWA Web App</p>
-		  <p>Created with HTML to Web App Converter</p>
-		</div>
-	  </body>
-	</html>
+    </script>
+  </body>
+</html>
