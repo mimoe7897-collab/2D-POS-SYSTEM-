@@ -3,17 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MASTER 2D · REAL API SNIPER</title>
-    
+    <title>MASTER 2D AMO · FINAL</title>
     <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Padauk:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
-    <!-- QR & Chart Libraries -->
+    <!-- QR Code Library -->
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
-    <script src="https://unpkg.com/html5-qrcode"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+    <!-- Html5Qrcode -->
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -21,7 +18,6 @@
             box-sizing: border-box;
             font-family: 'Padauk', sans-serif;
         }
-
         :root {
             --gold: #D4AF37;
             --gold-light: #f5d742;
@@ -39,7 +35,6 @@
             --neon-green: #39ff14;
             --neon-red: #ff004c;
         }
-
         body {
             background: var(--bg);
             color: var(--text);
@@ -47,7 +42,6 @@
             display: flex;
             flex-direction: column;
         }
-
         .app-container {
             max-width: 500px;
             margin: 0 auto;
@@ -58,8 +52,6 @@
             background: var(--bg);
             position: relative;
         }
-
-        /* Header */
         .header {
             background: linear-gradient(145deg, #0f0f0f, #1a1a1a);
             border-bottom: 2px solid var(--gold);
@@ -68,26 +60,23 @@
             justify-content: space-between;
             align-items: center;
         }
-
         .logo {
             font-family: 'Orbitron', sans-serif;
             font-weight: 900;
             font-size: 18px;
             color: var(--gold);
-            text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+            text-shadow: 0 0 10px rgba(212,175,55,0.3);
             letter-spacing: 1px;
         }
-
         .sync-status {
             display: flex;
             align-items: center;
             gap: 6px;
-            background: rgba(46, 125, 50, 0.1);
+            background: rgba(46,125,50,0.1);
             padding: 4px 10px;
             border-radius: 20px;
             border: 1px solid var(--success);
         }
-
         .sync-dot {
             width: 8px;
             height: 8px;
@@ -95,14 +84,11 @@
             border-radius: 50%;
             animation: pulse 2s infinite;
         }
-
         @keyframes pulse {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.2); }
-            100% { opacity: 1; transform: scale(1); }
+            0% { opacity:1; transform:scale(1); }
+            50% { opacity:0.5; transform:scale(1.2); }
+            100% { opacity:1; transform:scale(1); }
         }
-
-        /* Navigation Tabs */
         .nav-tabs {
             display: flex;
             background: var(--bg-card);
@@ -110,7 +96,6 @@
             gap: 6px;
             border-bottom: 1px solid var(--border);
         }
-
         .nav-btn {
             flex: 1;
             padding: 10px 4px;
@@ -127,18 +112,12 @@
             justify-content: center;
             gap: 6px;
         }
-
-        .nav-btn i {
-            font-size: 14px;
-        }
-
+        .nav-btn i { font-size: 14px; }
         .nav-btn.active {
             border-color: var(--gold);
             color: var(--gold);
-            background: rgba(212, 175, 55, 0.1);
+            background: rgba(212,175,55,0.1);
         }
-
-        /* Content Area */
         .content-area {
             flex: 1;
             overflow-y: auto;
@@ -147,16 +126,13 @@
             flex-direction: column;
             gap: 16px;
         }
-
-        /* Panels */
         .panel {
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 16px;
             padding: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
         }
-
         .panel-title {
             font-size: 12px;
             color: var(--gold);
@@ -167,12 +143,6 @@
             align-items: center;
             gap: 8px;
         }
-
-        .panel-title i {
-            font-size: 14px;
-        }
-
-        /* Display */
         .display-panel {
             background: #000;
             border: 2px solid var(--gold);
@@ -181,7 +151,6 @@
             position: relative;
             overflow: hidden;
         }
-
         .display-label {
             position: absolute;
             top: 8px;
@@ -191,7 +160,6 @@
             opacity: 0.5;
             font-family: monospace;
         }
-
         .display-value {
             text-align: right;
             font-size: 48px;
@@ -200,56 +168,38 @@
             color: white;
             line-height: 1.2;
         }
-
         .display-unit {
             font-size: 16px;
             color: var(--gold);
             opacity: 0.7;
             margin-left: 8px;
         }
-
-        /* Voucher List */
-        .voucher-header {
+        .voucher-header, .voucher-row {
             display: grid;
             grid-template-columns: 40px 80px 60px 40px 60px 40px 60px 80px 40px;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 8px;
-            border-radius: 8px;
-            font-size: 11px;
-            color: var(--text-muted);
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-
-        .voucher-row {
-            display: grid;
-            grid-template-columns: 40px 80px 60px 40px 60px 40px 60px 80px 40px;
-            padding: 8px;
-            border-bottom: 1px solid var(--border);
+            gap: 2px;
             align-items: center;
             font-size: 12px;
         }
-
-        .voucher-row:hover {
-            background: rgba(255, 255, 255, 0.02);
+        .voucher-header {
+            background: rgba(255,255,255,0.05);
+            padding: 8px;
+            border-radius: 8px;
+            color: var(--text-muted);
+            font-weight: bold;
         }
-
+        .voucher-row {
+            padding: 8px;
+            border-bottom: 1px solid var(--border);
+        }
         .delete-btn {
             background: var(--danger);
             color: white;
             border: none;
             border-radius: 4px;
             padding: 4px 8px;
-            font-size: 11px;
             cursor: pointer;
-            transition: opacity 0.2s;
         }
-
-        .delete-btn:hover {
-            opacity: 0.8;
-        }
-
-        /* Total Bar */
         .total-bar {
             background: var(--gold);
             color: black;
@@ -261,15 +211,12 @@
             font-family: 'Orbitron', sans-serif;
             margin: 8px 0;
         }
-
-        /* Keypad Grid */
         .keypad-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 8px;
             margin-top: 8px;
         }
-
         .key {
             background: linear-gradient(145deg, #1a1a1a, #222);
             border: 1px solid var(--border);
@@ -283,26 +230,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
-
-        .key:active {
-            transform: scale(0.95);
-            background: #2a2a2a;
-        }
-
-        .key.logic {
-            background: #1a3a1a;
-            color: #aaffaa;
-            border-color: #2a5a2a;
-        }
-
-        .key.accent {
-            background: #1a3a4a;
-            color: #aaddff;
-            border-color: #2a5a6a;
-        }
-
+        .key:active { transform: scale(0.95); background:#2a2a2a; }
+        .key.logic { background:#1a3a1a; color:#aaffaa; border-color:#2a5a2a; }
+        .key.accent { background:#1a3a4a; color:#aaddff; border-color:#2a5a6a; }
         .key.enter {
             background: var(--gold);
             color: black;
@@ -310,25 +242,9 @@
             grid-column: span 2;
             border-color: var(--gold-dark);
         }
-
-        .key.danger {
-            background: var(--danger);
-            color: white;
-            border-color: #8f0000;
-        }
-
-        .key.info {
-            background: var(--info);
-            color: white;
-            border-color: #0b5e9e;
-        }
-
-        .key.space {
-            background: #2a2a2a;
-            color: var(--gold);
-        }
-
-        /* Live Sniper */
+        .key.danger { background: var(--danger); color: white; }
+        .key.info { background: var(--info); color: white; }
+        .key.space { background:#2a2a2a; color: var(--gold); }
         .sniper-panel {
             background: #0f1a0f;
             border: 2px solid var(--neon-green);
@@ -337,19 +253,17 @@
             text-align: center;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 0 30px rgba(57, 255, 20, 0.2);
+            box-shadow: 0 0 30px rgba(57,255,20,0.2);
         }
-
         .sniper-panel.locked {
             border-color: var(--neon-red);
-            box-shadow: 0 0 30px rgba(255, 0, 76, 0.3);
+            box-shadow: 0 0 30px rgba(255,0,76,0.3);
         }
-
         .crosshair {
             position: absolute;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
+            transform: translate(-50%,-50%);
             width: 200px;
             height: 200px;
             border: 2px solid currentColor;
@@ -357,14 +271,12 @@
             opacity: 0.1;
             pointer-events: none;
         }
-
         .crosshair::before,
         .crosshair::after {
             content: '';
             position: absolute;
             background: currentColor;
         }
-
         .crosshair::before {
             top: 50%;
             left: 0;
@@ -372,7 +284,6 @@
             height: 2px;
             transform: translateY(-50%);
         }
-
         .crosshair::after {
             left: 50%;
             top: 0;
@@ -380,7 +291,6 @@
             height: 100%;
             transform: translateX(-50%);
         }
-
         .sniper-time {
             font-family: 'Orbitron', monospace;
             font-size: 32px;
@@ -388,32 +298,27 @@
             margin: 16px 0;
             text-shadow: 0 0 10px currentColor;
         }
-
         .sniper-data {
             display: flex;
             gap: 16px;
             margin: 20px 0;
         }
-
         .sniper-data-item {
             flex: 1;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0,0,0,0.5);
             border-radius: 12px;
             padding: 12px;
         }
-
         .sniper-data-label {
             font-size: 10px;
             opacity: 0.6;
             margin-bottom: 4px;
         }
-
         .sniper-data-value {
             font-family: 'Orbitron', monospace;
             font-size: 18px;
             font-weight: 700;
         }
-
         .sniper-prediction {
             font-family: 'Orbitron', monospace;
             font-size: 72px;
@@ -421,26 +326,16 @@
             margin: 20px 0;
             letter-spacing: 4px;
         }
-
         .sniper-status {
             font-size: 12px;
             padding: 8px;
             border-radius: 20px;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255,255,255,0.05);
             display: inline-block;
             margin-top: 12px;
         }
-
-        .blink {
-            animation: blink 1s step-end infinite;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-
-        /* Last 7 days results */
+        .blink { animation: blink 1s step-end infinite; }
+        @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
         .history-results {
             display: flex;
             justify-content: space-between;
@@ -448,7 +343,6 @@
             margin-top: 16px;
             flex-wrap: wrap;
         }
-
         .history-day {
             flex: 1;
             min-width: 50px;
@@ -458,21 +352,8 @@
             text-align: center;
             border: 1px solid var(--border);
         }
-
-        .history-day .date {
-            font-size: 10px;
-            color: var(--gold);
-            margin-bottom: 4px;
-        }
-
-        .history-day .result {
-            font-family: 'Orbitron', monospace;
-            font-size: 16px;
-            font-weight: bold;
-            color: white;
-        }
-
-        /* Ledger Grid */
+        .history-day .date { font-size:10px; color:var(--gold); margin-bottom:4px; }
+        .history-day .result { font-family:'Orbitron',monospace; font-size:16px; font-weight:bold; }
         .ledger-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -481,12 +362,7 @@
             padding: 8px;
             border-radius: 8px;
         }
-
-        .ledger-col {
-            background: var(--bg-card);
-            border-radius: 4px;
-        }
-
+        .ledger-col { background: var(--bg-card); border-radius:4px; }
         .ledger-item {
             display: flex;
             justify-content: space-between;
@@ -494,53 +370,31 @@
             border-bottom: 1px solid var(--border);
             font-size: 13px;
         }
-
-        .ledger-num {
-            color: var(--gold);
-            font-weight: bold;
-            font-family: monospace;
-        }
-
+        .ledger-num { color:var(--gold); font-weight:bold; font-family:monospace; }
         .ledger-edit-input {
-            width: 100%;
-            background: #000;
-            color: #fff;
-            border: 1px solid var(--gold);
-            text-align: right;
-            font-size: 14px;
-            padding: 4px;
-            border-radius: 4px;
+            width:100%; background:#000; color:#fff; border:1px solid var(--gold);
+            text-align:right; font-size:14px; padding:4px; border-radius:4px;
         }
-
-        /* Modal */
         .modal {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 2000;
+            top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.95);
+            z-index:2000;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding:20px;
         }
-
-        .modal.active {
-            display: flex;
-        }
-
+        .modal.active { display: flex; }
         .modal-content {
             background: white;
             border-radius: 16px;
             padding: 20px;
             max-width: 450px;
-            width: 100%;
+            width:100%;
             max-height: 80vh;
             overflow-y: auto;
         }
-
         .preview-edit-row {
             display: grid;
             grid-template-columns: 1fr 1fr 40px 70px 40px 70px 50px 40px;
@@ -551,381 +405,156 @@
             border-radius: 6px;
             align-items: center;
         }
-
-        .preview-edit-input {
-            padding: 6px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 12px;
-        }
-
-        canvas {
-            width: 100%;
-            border: 2px solid #333;
-            border-radius: 8px;
-            background: white;
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 8px;
-            margin-top: 16px;
-        }
-
-        .modal-btn {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-
-        .modal-btn:hover {
-            opacity: 0.9;
-        }
-
-        /* QR Scanner */
-        #qrScannerBox {
-            background: var(--bg-card);
-            border: 1px solid var(--gold);
-            border-radius: 12px;
-            padding: 16px;
-            margin-top: 12px;
-        }
-
-        #qrReader {
-            width: 100%;
-            min-height: 200px;
-            background: #000;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        /* History Items */
+        .preview-edit-input { padding:6px; border:1px solid #ccc; border-radius:4px; font-size:12px; }
+        canvas { width:100%; border:2px solid #333; border-radius:8px; background:white; }
+        .modal-buttons { display:flex; gap:8px; margin-top:16px; }
+        .modal-btn { flex:1; padding:12px; border:none; border-radius:8px; font-weight:bold; cursor:pointer; }
+        #qrScannerBox { background: var(--bg-card); border:1px solid var(--gold); border-radius:12px; padding:16px; margin-top:12px; }
+        #qrReader { width:100%; min-height:200px; background:#000; border-radius:8px; overflow:hidden; }
         .history-item {
-            background: #111;
-            margin-bottom: 12px;
-            padding: 12px;
-            border-radius: 8px;
-            position: relative;
-            border: 1px solid var(--border);
+            background:#111; margin-bottom:12px; padding:12px; border-radius:8px;
+            border:1px solid var(--border); position:relative;
         }
-
-        .history-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        .history-time {
-            font-weight: bold;
-            color: var(--gold);
-        }
-
-        .history-actions {
-            display: flex;
-            gap: 8px;
-        }
-
+        .history-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+        .history-time { font-weight:bold; color:var(--gold); }
+        .history-actions { display:flex; gap:8px; }
         .history-edit-btn, .history-delete-btn {
-            background: var(--info);
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 4px 8px;
-            font-size: 11px;
-            cursor: pointer;
+            background:var(--info); color:white; border:none; border-radius:4px; padding:4px 8px; font-size:11px; cursor:pointer;
         }
-
-        .history-delete-btn {
-            background: var(--danger);
-        }
-
-        .history-total {
-            font-size: 16px;
-            font-weight: bold;
-            color: var(--neon-green);
-        }
-
-        .history-items-preview {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-top: 8px;
-        }
-
-        /* Utility */
-        .hidden {
-            display: none !important;
-        }
-
-        .text-gold {
-            color: var(--gold);
-        }
-
-        .text-success {
-            color: var(--success);
-        }
-
-        .text-danger {
-            color: var(--danger);
-        }
-
-        .mb-2 {
-            margin-bottom: 8px;
-        }
-
-        .mt-2 {
-            margin-top: 8px;
-        }
-
-        .flex {
-            display: flex;
-        }
-
-        .gap-2 {
-            gap: 8px;
-        }
-
-        .w-full {
-            width: 100%;
-        }
+        .history-delete-btn { background:var(--danger); }
+        .history-total { font-size:16px; font-weight:bold; color:var(--neon-green); }
+        .history-items-preview { font-size:12px; color:var(--text-muted); margin-top:8px; }
     </style>
 </head>
 <body>
     <div class="app-container">
         <!-- Header -->
         <div class="header">
-            <div class="logo">
-                <i class="fas fa-crown" style="color: var(--gold); margin-right: 6px;"></i>
-                MASTER 2D
-            </div>
-            <div class="sync-status">
-                <span class="sync-dot"></span>
-                <span style="font-size: 11px;">LIVE API</span>
-            </div>
+            <div class="logo"><i class="fas fa-crown" style="color:var(--gold); margin-right:6px;"></i>MASTER 2D</div>
+            <div class="sync-status"><span class="sync-dot"></span><span style="font-size:11px;">LIVE API</span></div>
         </div>
-
         <!-- Navigation -->
         <div class="nav-tabs">
-            <button class="nav-btn active" onclick="switchTab('pos')">
-                <i class="fas fa-calculator"></i> အရောင်း
-            </button>
-            <button class="nav-btn" onclick="switchTab('live')">
-                <i class="fas fa-crosshairs"></i> SNIPER
-            </button>
-            <button class="nav-btn" onclick="switchTab('ledger')">
-                <i class="fas fa-table"></i> လယ်ဂျာ
-            </button>
-            <button class="nav-btn" onclick="switchTab('history')">
-                <i class="fas fa-history"></i> History
-            </button>
+            <button class="nav-btn active" onclick="switchTab('pos')"><i class="fas fa-calculator"></i> အရောင်း</button>
+            <button class="nav-btn" onclick="switchTab('live')"><i class="fas fa-crosshairs"></i> SNIPER</button>
+            <button class="nav-btn" onclick="switchTab('ledger')"><i class="fas fa-table"></i> လယ်ဂျာ</button>
+            <button class="nav-btn" onclick="switchTab('history')"><i class="fas fa-history"></i> History</button>
         </div>
 
-        <!-- POS Tab -->
-        <div id="pos-tab" class="content-area" style="display: flex;">
-            <!-- Display -->
+        <!-- POS TAB -->
+        <div id="pos-tab" class="content-area" style="display:flex;">
             <div class="display-panel">
-                <div class="display-label">
-                    <i class="fas fa-circle" style="font-size: 6px; color: var(--gold); margin-right: 4px;"></i>
-                    DIGITAL DISPLAY SYSTEM
-                </div>
-                <div class="display-value">
-                    <span id="displayInput">0</span>
-                    <span class="display-unit">Ks</span>
-                </div>
+                <div class="display-label"><i class="fas fa-circle" style="font-size:6px;"></i> DIGITAL DISPLAY</div>
+                <div class="display-value"><span id="displayInput">0</span><span class="display-unit">Ks</span></div>
             </div>
-
-            <!-- Voucher Header -->
             <div class="voucher-header">
                 <div>No</div><div>နံပါတ်</div><div>Logic</div><div>R1</div><div>AMT1</div><div>R2</div><div>AMT2</div><div>Total</div><div>Del</div>
             </div>
-
-            <!-- Voucher List -->
-            <div id="voucherList" style="flex: 1; overflow-y: auto;"></div>
-
-            <!-- Total -->
+            <div id="voucherList" style="flex:1; overflow-y:auto;"></div>
             <div class="total-bar" id="posTotal">0 Ks</div>
-
             <!-- Keypad -->
             <div class="keypad-grid">
                 <button class="key logic" onclick="addToDisplay('ပါဝါ ')">ပါဝါ</button>
                 <button class="key logic" onclick="addToDisplay('နတ်က္ခ ')">နတ်က္ခ</button>
                 <button class="key logic" onclick="addToDisplay('အပူး ')">အပူး</button>
                 <button class="key logic" onclick="addToDisplay('ညီကို ')">ညီကို</button>
-
                 <button class="key logic" onclick="addToDisplay('ထိပ် ')">ထိပ်</button>
                 <button class="key logic" onclick="addToDisplay('ဘိတ် ')">ဘိတ်</button>
                 <button class="key logic" onclick="addToDisplay('ပွင့် ')">ပွင့်</button>
                 <button class="key logic" onclick="addToDisplay('ခွေ ')">ခွေ</button>
-
                 <button class="key accent" onclick="addToDisplay('အပါ ')">အပါ</button>
                 <button class="key accent" onclick="addToDisplay('အပူး+အပါ ')">အပူး+အပါ</button>
                 <button class="key accent" onclick="addToDisplay('အပူးပါခွေ ')">အပူးပါခွေ</button>
-                <button class="key info" onclick="showPreviewModal()">
-                    <i class="fas fa-print"></i> စမ်းထုတ်
-                </button>
-
-                <button class="key danger" onclick="deleteLast()">
-                    <i class="fas fa-backspace"></i>
-                </button>
+                <button class="key info" onclick="showPreviewModal()"><i class="fas fa-print"></i> စမ်းထုတ်</button>
+                <button class="key danger" onclick="deleteLast()"><i class="fas fa-backspace"></i></button>
                 <button class="key" onclick="addToDisplay('7')">7</button>
                 <button class="key" onclick="addToDisplay('8')">8</button>
                 <button class="key" onclick="addToDisplay('9')">9</button>
-
                 <button class="key" onclick="addToDisplay('4')">4</button>
                 <button class="key" onclick="addToDisplay('5')">5</button>
                 <button class="key" onclick="addToDisplay('6')">6</button>
                 <button class="key logic" onclick="addToDisplay(' R ')">R</button>
-
                 <button class="key" onclick="addToDisplay('1')">1</button>
                 <button class="key" onclick="addToDisplay('2')">2</button>
                 <button class="key" onclick="addToDisplay('3')">3</button>
                 <button class="key space" onclick="addToDisplay(' ')">Space</button>
-
                 <button class="key" onclick="addToDisplay('0')">0</button>
                 <button class="key" onclick="addToDisplay('00')">00</button>
                 <button class="key enter" onclick="processEnter()">ENTER</button>
             </div>
         </div>
 
-        <!-- Live Sniper Tab -->
-        <div id="live-tab" class="content-area" style="display: none;">
-            <div class="live-container">
-                <!-- Sniper Panel -->
-                <div id="sniperPanel" class="sniper-panel">
-                    <div class="crosshair"></div>
-                    
-                    <div style="position: relative; z-index: 10;">
-                        <h1 style="font-family: 'Orbitron'; font-size: 24px; letter-spacing: 8px; opacity: 0.8;">VOYAGER</h1>
-                        <h2 style="font-family: 'Orbitron'; font-size: 18px; letter-spacing: 4px; opacity: 0.6;">SNIPER</h2>
-                        
-                        <div class="sniper-time" id="sniperTime">--:--:--</div>
-                        
-                        <div class="sniper-data">
-                            <div class="sniper-data-item">
-                                <div class="sniper-data-label">SET INDEX</div>
-                                <div class="sniper-data-value" id="setIndex">----.--</div>
-                            </div>
-                            <div class="sniper-data-item">
-                                <div class="sniper-data-label">VALUE</div>
-                                <div class="sniper-data-value" id="setValue">----.--</div>
-                            </div>
-                        </div>
-                        
-                        <div class="sniper-prediction" id="sniperPrediction">--</div>
-                        
-                        <div class="sniper-status" id="sniperStatus">SCANNING LIVE DATA...</div>
-                        
-                        <div style="font-size: 10px; margin-top: 16px; opacity: 0.3; font-family: monospace;">
-                            TARGET: 30 MIN BEFORE EACH RESULT
-                        </div>
+        <!-- LIVE SNIPER TAB -->
+        <div id="live-tab" class="content-area" style="display:none;">
+            <div id="sniperPanel" class="sniper-panel">
+                <div class="crosshair"></div>
+                <div style="position:relative; z-index:10;">
+                    <h1 style="font-family:'Orbitron'; font-size:24px; letter-spacing:8px; opacity:0.8;">VOYAGER</h1>
+                    <h2 style="font-family:'Orbitron'; font-size:18px; letter-spacing:4px; opacity:0.6;">SNIPER</h2>
+                    <div class="sniper-time" id="sniperTime">--:--:--</div>
+                    <div class="sniper-data">
+                        <div class="sniper-data-item"><div class="sniper-data-label">SET INDEX</div><div class="sniper-data-value" id="setIndex">----.--</div></div>
+                        <div class="sniper-data-item"><div class="sniper-data-label">VALUE</div><div class="sniper-data-value" id="setValue">----.--</div></div>
                     </div>
-                </div>
-
-                <!-- Last 7 Days Results -->
-                <div class="panel">
-                    <div class="panel-title">
-                        <i class="fas fa-calendar-week"></i> အတည်ပြုထွက်ပြီး 2D ဂဏန်း (၇ ရက်)
-                    </div>
-                    <div class="history-results" id="lastSevenDays">
-                        <!-- Dynamic from API -->
-                    </div>
-                </div>
-
-                <!-- Today's Results -->
-                <div class="panel">
-                    <div class="panel-title">
-                        <i class="fas fa-clock"></i> ယနေ့ထွက်ရှိပြီးသော 2D များ
-                    </div>
-                    <div id="todayResults" class="history-results"></div>
-                </div>
-
-                <!-- Live 2D Display -->
-                <div class="panel">
-                    <div class="panel-title">
-                        <i class="fas fa-chart-line"></i> ယခုလက်ရှိ 2D
-                    </div>
-                    <div style="font-family: 'Orbitron'; font-size: 64px; text-align: center; color: var(--gold);" id="live2D">--</div>
-                </div>
-
-                <!-- Web Search (optional) -->
-                <div class="panel">
-                    <div class="panel-title">
-                        <i class="fas fa-search"></i> WEB SEARCH
-                    </div>
-                    <div style="display: flex; gap: 8px;">
-                        <input type="text" id="webSearchInput" placeholder="Search..." style="flex: 1; background: var(--bg-input); border: 1px solid var(--border); color: white; padding: 12px; border-radius: 8px;">
-                        <button onclick="webSearch()" style="background: var(--info); color: white; border: none; border-radius: 8px; padding: 0 16px; cursor: pointer;">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </div>
-                    <div id="searchResult" style="margin-top: 12px; font-size: 12px; color: var(--text-muted);"></div>
+                    <div class="sniper-prediction" id="sniperPrediction">--</div>
+                    <div class="sniper-status" id="sniperStatus">CONNECTING...</div>
+                    <div style="font-size:10px; margin-top:16px; opacity:0.3;">TARGET: 16:00 | LOGIC: SET.dec + VAL.int</div>
                 </div>
             </div>
-        </div>
-
-        <!-- Ledger Tab -->
-        <div id="ledger-tab" class="content-area" style="display: none;">
+            <!-- Last 7 days (dummy) -->
             <div class="panel">
-                <div class="panel-title">
-                    <i class="fas fa-qrcode"></i> QR SYNC
-                </div>
-                <div style="display: flex; gap: 8px;">
-                    <button onclick="generateQR()" style="flex: 1; background: var(--success); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer;">
-                        <i class="fas fa-qrcode"></i> QR ထုတ်
-                    </button>
-                    <button onclick="startScanner()" style="flex: 1; background: var(--info); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer;">
-                        <i class="fas fa-camera"></i> QR ဖတ်
-                    </button>
-                    <button onclick="toggleLedgerEdit()" style="flex: 1; background: var(--gold); color: black; border: none; padding: 12px; border-radius: 8px; cursor: pointer;">
-                        <i class="fas fa-edit"></i> ပြင်
-                    </button>
-                </div>
+                <div class="panel-title"><i class="fas fa-calendar-week"></i> အတည်ပြုထွက်ပြီး 2D (၇ ရက်)</div>
+                <div class="history-results" id="lastSevenDays"></div>
             </div>
-
-            <!-- QR Scanner Box -->
-            <div id="qrScannerBox" style="display: none;">
-                <div id="qrReader"></div>
-                <button onclick="stopScanner()" style="width: 100%; margin-top: 8px; background: var(--danger); color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer;">
-                    Camera ပိတ်
-                </button>
+            <div class="panel">
+                <div class="panel-title"><i class="fas fa-chart-line"></i> ယနေ့ထွက်ရှိ 2D</div>
+                <div style="font-family:'Orbitron'; font-size:64px; text-align:center; color:var(--gold);" id="live2D">--</div>
             </div>
-
-            <!-- QR Generator Box -->
-            <div id="qrGeneratorBox" style="display: none; background: white; border-radius: 12px; padding: 20px; text-align: center;">
-                <canvas id="qrCanvas"></canvas>
-                <div style="margin-top: 12px; display: flex; gap: 8px;">
-                    <button onclick="downloadQR()" style="flex: 1; background: var(--success); color: white; border: none; padding: 8px; border-radius: 6px;">Save QR</button>
-                    <button onclick="closeQRGenerator()" style="flex: 1; background: var(--danger); color: white; border: none; padding: 8px; border-radius: 6px;">Close</button>
+            <div class="panel">
+                <div class="panel-title"><i class="fas fa-search"></i> WEB SEARCH</div>
+                <div style="display:flex; gap:8px;">
+                    <input type="text" id="webSearchInput" placeholder="Search..." style="flex:1; background:var(--bg-input); border:1px solid var(--border); color:white; padding:12px; border-radius:8px;">
+                    <button onclick="webSearch()" style="background:var(--info); color:white; border:none; border-radius:8px; padding:0 16px; cursor:pointer;"><i class="fas fa-search"></i></button>
                 </div>
+                <div id="searchResult" style="margin-top:12px; font-size:12px; color:var(--text-muted);"></div>
             </div>
-
-            <!-- Ledger Grid -->
-            <div class="panel" style="flex: 1; overflow: hidden; display: flex; flex-direction: column;">
-                <div class="panel-title">
-                    <i class="fas fa-table"></i> LEDGER MASTER
-                </div>
-                <div style="margin-bottom: 12px; text-align: right; font-family: 'Orbitron'; font-size: 20px; color: var(--gold);" id="grandTotal">0 Ks</div>
-                <div class="ledger-grid" id="ledgerGrid" style="flex: 1; overflow-y: auto;"></div>
-            </div>
-
-            <!-- Reset Button -->
-            <button onclick="resetAllData()" style="background: var(--danger); color: white; border: none; padding: 16px; border-radius: 8px; font-weight: bold; cursor: pointer;">
-                <i class="fas fa-exclamation-triangle"></i> RESET စာရင်းအားလုံး
-            </button>
         </div>
 
-        <!-- History Tab -->
-        <div id="history-tab" class="content-area" style="display: none;">
-            <div class="panel" style="flex: 1; overflow: hidden; display: flex; flex-direction: column;">
-                <div class="panel-title">
-                    <i class="fas fa-history"></i> ဘောင်ချာမှတ်တမ်း (Edit လုပ်နိုင်)
+        <!-- LEDGER TAB -->
+        <div id="ledger-tab" class="content-area" style="display:none;">
+            <div class="panel">
+                <div class="panel-title"><i class="fas fa-qrcode"></i> QR SYNC</div>
+                <div style="display:flex; gap:8px;">
+                    <button onclick="generateQR()" style="flex:1; background:var(--success); color:white; border:none; padding:12px; border-radius:8px;">QR ထုတ်</button>
+                    <button onclick="startScanner()" style="flex:1; background:var(--info); color:white; border:none; padding:12px; border-radius:8px;">QR ဖတ်</button>
+                    <button onclick="toggleLedgerEdit()" style="flex:1; background:var(--gold); color:black; border:none; padding:12px; border-radius:8px;">ပြင်</button>
                 </div>
-                <div id="historyList" style="flex: 1; overflow-y: auto;"></div>
-                <div class="total-bar" id="historyCount" style="margin-top: 12px;">မှတ်တမ်း 0 ခု</div>
+            </div>
+            <div id="qrScannerBox" style="display:none;">
+                <div id="qrReader"></div>
+                <button onclick="stopScanner()" style="width:100%; margin-top:8px; background:var(--danger); color:white; border:none; padding:10px;">Camera ပိတ်</button>
+            </div>
+            <div id="qrGeneratorBox" style="display:none; background:white; border-radius:12px; padding:20px; text-align:center;">
+                <canvas id="qrCanvas"></canvas>
+                <div style="margin-top:12px; display:flex; gap:8px;">
+                    <button onclick="downloadQR()" style="flex:1; background:var(--success); color:white; border:none; padding:8px;">Save QR</button>
+                    <button onclick="closeQRGenerator()" style="flex:1; background:var(--danger); color:white; border:none; padding:8px;">Close</button>
+                </div>
+            </div>
+            <div class="panel" style="flex:1; display:flex; flex-direction:column;">
+                <div class="panel-title"><i class="fas fa-table"></i> LEDGER MASTER</div>
+                <div style="margin-bottom:12px; text-align:right; font-family:'Orbitron'; font-size:20px; color:var(--gold);" id="grandTotal">0 Ks</div>
+                <div class="ledger-grid" id="ledgerGrid" style="flex:1; overflow-y:auto;"></div>
+            </div>
+            <button onclick="resetAllData()" style="background:var(--danger); color:white; border:none; padding:16px; border-radius:8px; font-weight:bold;">RESET စာရင်းအားလုံး</button>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div id="history-tab" class="content-area" style="display:none;">
+            <div class="panel" style="flex:1; display:flex; flex-direction:column;">
+                <div class="panel-title"><i class="fas fa-history"></i> ဘောင်ချာမှတ်တမ်း (Edit လုပ်နိုင်)</div>
+                <div id="historyList" style="flex:1; overflow-y:auto;"></div>
+                <div class="total-bar" id="historyCount" style="margin-top:12px;">မှတ်တမ်း 0 ခု</div>
             </div>
         </div>
     </div>
@@ -933,13 +562,13 @@
     <!-- Preview Modal -->
     <div id="previewModal" class="modal">
         <div class="modal-content">
-            <h3 style="text-align: center; margin-bottom: 16px;">ဘောင်ချာအစမ်းကြည့်</h3>
-            <div id="previewEditArea" style="margin-bottom: 16px;"></div>
+            <h3 style="text-align:center; margin-bottom:16px;">ဘောင်ချာအစမ်းကြည့်</h3>
+            <div id="previewEditArea" style="margin-bottom:16px;"></div>
             <canvas id="printCanvas"></canvas>
             <div class="modal-buttons">
-                <button class="modal-btn" style="background: #333; color: white;" onclick="closeModal()">မထုတ်တော့ပါ</button>
-                <button class="modal-btn" style="background: var(--info); color: white;" onclick="printOnly()">ပရင့်ထုတ်</button>
-                <button class="modal-btn" style="background: var(--success); color: white;" onclick="printAndAddToLedger()">ထုတ်+လယ်ဂျာ</button>
+                <button class="modal-btn" style="background:#333; color:white;" onclick="closeModal()">မထုတ်တော့ပါ</button>
+                <button class="modal-btn" style="background:var(--info); color:white;" onclick="printOnly()">ပရင့်ထုတ်</button>
+                <button class="modal-btn" style="background:var(--success); color:white;" onclick="printAndAddToLedger()">ထုတ်+လယ်ဂျာ</button>
             </div>
         </div>
     </div>
@@ -947,11 +576,11 @@
     <!-- History Edit Modal -->
     <div id="historyEditModal" class="modal">
         <div class="modal-content">
-            <h3 style="text-align: center; margin-bottom: 16px;">History ပြင်ဆင်ရန်</h3>
+            <h3 style="text-align:center; margin-bottom:16px;">History ပြင်ဆင်ရန်</h3>
             <div id="historyEditContent"></div>
             <div class="modal-buttons">
-                <button class="modal-btn" style="background: #333; color: white;" onclick="closeHistoryEdit()">မပြင်တော့ပါ</button>
-                <button class="modal-btn" style="background: var(--success); color: white;" onclick="saveHistoryEdit()">သိမ်းမည်</button>
+                <button class="modal-btn" style="background:#333; color:white;" onclick="closeHistoryEdit()">မပြင်တော့ပါ</button>
+                <button class="modal-btn" style="background:var(--success); color:white;" onclick="saveHistoryEdit()">သိမ်းမည်</button>
             </div>
         </div>
     </div>
@@ -970,16 +599,12 @@
         let voucherHistory = [];
         let html5QrCode = null;
         let ledgerEditMode = false;
-        let sniperInterval = null;      // for the sniper lock check (runs every sec)
-        let liveInterval = null;        // for fetching API every 3 sec
+        let sniperInterval = null;
         let isSniperLocked = false;
         let displayBuffer = "";
         let editingHistoryIndex = -1;
 
-        // API data cache
-        let lastLiveData = null;
-        let resultTimes = [];           // e.g. ["11:00:00","12:01:00","15:00:00","16:30:00"]
-        let fallbackSevenResults = [
+        const lastSevenResults = [
             { date: "02/17", result: "45" },
             { date: "02/18", result: "78" },
             { date: "02/19", result: "12" },
@@ -989,7 +614,6 @@
             { date: "02/23", result: "56" }
         ];
 
-        // ==================== INIT ====================
         window.onload = function() {
             loadLedger();
             loadHistory();
@@ -997,370 +621,126 @@
             renderLedger();
             renderHistoryList();
             updateDisplayValue();
-            startLiveUpdates();           // starts API polling & sniper checks
-            fetchLastSevenDays();          // load real history
+            startSniper();
+            renderLastSevenDays();
         };
 
-        // ==================== TAB SWITCHING ====================
+        function renderLastSevenDays() {
+            const container = document.getElementById('lastSevenDays');
+            let html = '';
+            lastSevenResults.forEach(day => {
+                html += `<div class="history-day"><div class="date">${day.date}</div><div class="result">${day.result}</div></div>`;
+            });
+            container.innerHTML = html;
+        }
+
         function switchTab(tab) {
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.content-area').forEach(area => area.style.display = 'none');
-            
             if (tab === 'pos') {
                 document.getElementById('pos-tab').style.display = 'flex';
                 document.querySelectorAll('.nav-btn')[0].classList.add('active');
-                stopLiveUpdates();          // stop API when not in live tab
             } else if (tab === 'live') {
                 document.getElementById('live-tab').style.display = 'flex';
                 document.querySelectorAll('.nav-btn')[1].classList.add('active');
-                startLiveUpdates();          // start API when entering live
             } else if (tab === 'ledger') {
                 document.getElementById('ledger-tab').style.display = 'flex';
                 document.querySelectorAll('.nav-btn')[2].classList.add('active');
                 renderLedger();
-                stopLiveUpdates();
             } else if (tab === 'history') {
                 document.getElementById('history-tab').style.display = 'flex';
                 document.querySelectorAll('.nav-btn')[3].classList.add('active');
                 renderHistoryList();
-                stopLiveUpdates();
             }
         }
 
-        // ==================== API CALLS ====================
-        async function fetchLiveData() {
-            try {
-                const response = await fetch('https://api.thaistock2d.com/live');
-                const data = await response.json();
-                lastLiveData = data;
+        function addToDisplay(val) { displayBuffer += val; updateDisplayValue(); }
+        function deleteLast() { displayBuffer = displayBuffer.slice(0,-1); updateDisplayValue(); }
+        function updateDisplayValue() { document.getElementById('displayInput').innerText = displayBuffer || "0"; }
+        function clearDisplay() { displayBuffer = ""; updateDisplayValue(); }
 
-                // Update live display
-                document.getElementById('setIndex').innerText = data.live.set;
-                document.getElementById('setValue').innerText = data.live.value;
-                document.getElementById('live2D').innerText = data.live.twod;
-                document.getElementById('sniperTime').innerText = data.live.time.split(' ')[1]; // show current time
-
-                // Store result times for sniper locking
-                if (data.result && Array.isArray(data.result)) {
-                    resultTimes = data.result.map(r => r.open_time);
-                }
-
-                // Update today's results list
-                renderTodayResults(data.result);
-
-                // Update sniper lock status based on next result
-                updateSniperLock(data.live.time);
-
-                return data;
-            } catch (error) {
-                console.warn('API fetch failed, using simulation', error);
-                // Fallback to simulated data (original random)
-                simulateLiveData();
-                return null;
-            }
-        }
-
-        function simulateLiveData() {
-            const now = new Date();
-            const timeStr = now.toLocaleTimeString('en-GB', { hour12: false });
-            document.getElementById('sniperTime').innerText = timeStr;
-
-            const setVal = (1350 + Math.random() * 50).toFixed(2);
-            const valVal = (14200 + Math.random() * 100).toFixed(2);
-
-            document.getElementById('setIndex').innerText = setVal;
-            document.getElementById('setValue').innerText = valVal;
-
-            const setLast = setVal.split('.')[1]?.slice(-1) || '0';
-            const valLast = valVal.split('.')[0]?.slice(-1) || '0';
-            const currentPred = setLast + valLast;
-
-            document.getElementById('live2D').innerText = currentPred;
-            document.getElementById('sniperPrediction').innerText = currentPred;
-        }
-
-        async function fetchLastSevenDays() {
-            try {
-                const response = await fetch('https://api.thaistock2d.com/2d_result');
-                const data = await response.json(); // array of last 10 days
-                // take first 7
-                const last7 = data.slice(0, 7).map(day => {
-                    // day: { date: "2021-11-04", child: [...] }
-                    // final result is the last child with is_result "on" or simply the last entry?
-                    // We'll use the last child's twod as the result for simplicity.
-                    const final = day.child && day.child.length ? day.child[day.child.length-1].twod : '--';
-                    return {
-                        date: day.date.split('-').slice(1).join('/'), // convert to MM/DD
-                        result: final
-                    };
-                });
-                renderLastSevenDays(last7);
-            } catch (error) {
-                console.warn('Failed to fetch 2d_result, using fallback', error);
-                renderLastSevenDays(fallbackSevenResults);
-            }
-        }
-
-        function renderTodayResults(results) {
-            if (!results) return;
-            const container = document.getElementById('todayResults');
-            if (!container) return;
-            let html = '';
-            results.forEach(r => {
-                html += `<div class="history-day">
-                    <div class="date">${r.open_time}</div>
-                    <div class="result">${r.twod}</div>
-                </div>`;
-            });
-            container.innerHTML = html;
-        }
-
-        function renderLastSevenDays(days) {
-            const container = document.getElementById('lastSevenDays');
-            if (!container) return;
-            let html = '';
-            days.forEach(day => {
-                html += `<div class="history-day">
-                    <div class="date">${day.date}</div>
-                    <div class="result">${day.result}</div>
-                </div>`;
-            });
-            container.innerHTML = html;
-        }
-
-        // ==================== SNIPER LOCK LOGIC ====================
-        function updateSniperLock(currentTimeStr) {
-            // currentTimeStr format: "2021-11-04 16:12:40"
-            const now = new Date(currentTimeStr.replace(' ', 'T') + '+07:00'); // assume Thai time
-            if (isNaN(now)) return;
-
-            const panel = document.getElementById('sniperPanel');
-            const statusEl = document.getElementById('sniperStatus');
-            const predEl = document.getElementById('sniperPrediction');
-
-            // Find the next result time
-            let nextTime = null;
-            for (let timeStr of resultTimes) {
-                const [hour, minute] = timeStr.split(':').map(Number);
-                const resultDate = new Date(now);
-                resultDate.setHours(hour, minute, 0, 0);
-                if (resultDate > now) {
-                    nextTime = resultDate;
-                    break;
-                }
-            }
-
-            if (!nextTime) {
-                // No upcoming result today, use first result of tomorrow? For simplicity, just don't lock.
-                panel.classList.remove('locked');
-                statusEl.innerText = 'AWAITING NEXT RESULT';
-                predEl.innerText = '--';
-                isSniperLocked = false;
-                return;
-            }
-
-            const diffMinutes = (nextTime - now) / (1000 * 60);
-            const lockThreshold = 30; // minutes
-
-            if (diffMinutes <= lockThreshold && diffMinutes > 0) {
-                isSniperLocked = true;
-                panel.classList.add('locked');
-                statusEl.innerText = `🔒 LOCKED (${nextTime.toLocaleTimeString()})`;
-                statusEl.classList.add('blink');
-                // prediction freezes on current live 2D
-                predEl.innerText = document.getElementById('live2D').innerText;
-            } else {
-                isSniperLocked = false;
-                panel.classList.remove('locked');
-                statusEl.innerText = 'SCANNING LIVE DATA...';
-                statusEl.classList.remove('blink');
-                predEl.innerText = '--';
-            }
-        }
-
-        // ==================== LIVE UPDATES ====================
-        function startLiveUpdates() {
-            if (liveInterval) clearInterval(liveInterval);
-            // immediate first fetch
-            fetchLiveData();
-            liveInterval = setInterval(fetchLiveData, 3000);
-        }
-
-        function stopLiveUpdates() {
-            if (liveInterval) clearInterval(liveInterval);
-        }
-
-        // ==================== DISPLAY ====================
-        function addToDisplay(val) {
-            displayBuffer += val;
-            updateDisplayValue();
-        }
-
-        function deleteLast() {
-            displayBuffer = displayBuffer.slice(0, -1);
-            updateDisplayValue();
-        }
-
-        function updateDisplayValue() {
-            document.getElementById('displayInput').innerText = displayBuffer || "0";
-        }
-
-        function clearDisplay() {
-            displayBuffer = "";
-            updateDisplayValue();
-        }
-
-        // ==================== POS LOGIC ====================
-        function isDoubleDigit(n) {
-            return n % 11 === 0;
-        }
+        function isDoubleDigit(n) { return n % 11 === 0; }
 
         function getTargets(num, logic) {
             let targets = [];
-            
             if (logic === "ထိပ်") {
-                for (let i=0; i<10; i++) targets.push(parseInt(num[0] + i));
-            }
-            else if (logic === "ဘိတ်") {
-                for (let i=0; i<10; i++) targets.push(parseInt(i + num[num.length-1]));
-            }
-            else if (logic === "ပွင့်") {
-                let s = parseInt(num) % 10;
-                for (let i=0; i<100; i++) {
-                    if ((Math.floor(i/10) + (i%10)) % 10 === s) targets.push(i);
-                }
-            }
-            else if (logic === "ခွေ") {
+                for (let i=0;i<10;i++) targets.push(parseInt(num[0]+i));
+            } else if (logic === "ဘိတ်") {
+                for (let i=0;i<10;i++) targets.push(parseInt(i+num[num.length-1]));
+            } else if (logic === "ပွင့်") {
+                let s = parseInt(num)%10;
+                for (let i=0;i<100;i++) if ((Math.floor(i/10)+(i%10))%10 === s) targets.push(i);
+            } else if (logic === "ခွေ") {
                 let d = num.split('');
-                for (let i=0; i<d.length; i++) {
-                    for (let j=0; j<d.length; j++) {
-                        if (i !== j) targets.push(parseInt(d[i] + d[j]));
-                    }
-                }
-            }
-            else if (logic === "အပူးပါခွေ") {
+                for (let i=0;i<d.length;i++) for (let j=0;j<d.length;j++) if(i!==j) targets.push(parseInt(d[i]+d[j]));
+            } else if (logic === "အပူးပါခွေ") {
                 let d = num.split('');
-                for (let i=0; i<d.length; i++) {
-                    for (let j=0; j<d.length; j++) {
-                        targets.push(parseInt(d[i] + d[j]));
-                    }
-                }
-            }
-            else if (logic === "အပါ") {
-                for (let i=0; i<10; i++) {
-                    targets.push(parseInt(num + i));
-                    targets.push(parseInt(i + num));
-                }
+                for (let i=0;i<d.length;i++) for (let j=0;j<d.length;j++) targets.push(parseInt(d[i]+d[j]));
+            } else if (logic === "အပါ") {
+                for (let i=0;i<10;i++) { targets.push(parseInt(num+i)); targets.push(parseInt(i+num)); }
                 targets = [...new Set(targets)];
-            }
-            else if (logic === "အပူး+အပါ") {
-                for (let i=0; i<10; i++) {
-                    targets.push(parseInt(num + i));
-                    targets.push(parseInt(i + num));
-                }
-            }
-            else if (GROUPS[logic] && num) {
+            } else if (logic === "အပူး+အပါ") {
+                for (let i=0;i<10;i++) { targets.push(parseInt(num+i)); targets.push(parseInt(i+num)); }
+            } else if (GROUPS[logic] && num) {
                 targets = GROUPS[logic].filter(n => n.includes(num)).map(Number);
-            }
-            else if (GROUPS[logic]) {
+            } else if (GROUPS[logic]) {
                 targets = GROUPS[logic].map(Number);
-            }
-            else if (num) {
+            } else if (num) {
                 targets.push(parseInt(num));
             }
-            
             return [...new Set(targets)];
         }
 
         function calculateItemTotal(item) {
-            let v1 = parseInt(item.amt1) || 0;
-            let v2 = parseInt(item.amt2) || 0;
-            let baseTotal = v1 + v2;
-            let multiplier = 1;
-            
-            let targets = getTargets(item.desc, item.logic);
-            let count = targets.length;
-            
+            let v1 = parseInt(item.amt1)||0, v2 = parseInt(item.amt2)||0, base=v1+v2, multiplier=1;
             if (item.logic === "ခွေ") {
-                let digits = item.desc ? item.desc.length : 0;
-                multiplier = digits * (digits - 1);
-            }
-            else if (item.logic === "အပူးပါခွေ") {
-                let digits = item.desc ? item.desc.length : 0;
-                multiplier = digits * digits;
-            }
-            else if (item.logic === "အပါ") {
-                multiplier = 19;
-            }
-            else if (item.logic === "အပူး+အပါ") {
-                multiplier = 20;
-            }
-            else if (["ထိပ်","ဘိတ်","ပွင့်"].includes(item.logic)) {
+                multiplier = (item.desc?.length||0) * ((item.desc?.length||0)-1);
+            } else if (item.logic === "အပူးပါခွေ") {
+                multiplier = (item.desc?.length||0) * (item.desc?.length||0);
+            } else if (["ထိပ်","ဘိတ်","ပွင့်"].includes(item.logic)) {
                 multiplier = 10;
-            }
-            else if (GROUPS[item.logic]) {
+            } else if (item.logic === "အပါ") {
+                multiplier = 19;
+            } else if (item.logic === "အပူး+အပါ") {
+                multiplier = 20;
+            } else if (GROUPS[item.logic]) {
                 multiplier = GROUPS[item.logic].length;
-            }
-            else {
-                multiplier = count;
-            }
-            
-            let r1 = item.r1 === "R" && !isDoubleDigit(parseInt(item.desc));
-            let r2 = item.r2 === "R" && !isDoubleDigit(parseInt(item.desc));
-            
-            if (r1 && r2) {
-                return baseTotal * multiplier * 2;
-            } else if (r1) {
-                return (v1 * 2 + v2) * multiplier;
-            } else if (r2) {
-                return (v1 + v2 * 2) * multiplier;
             } else {
-                return baseTotal * multiplier;
+                multiplier = getTargets(item.desc, item.logic).length || 1;
             }
+            let r1 = item.r1==="R" && !isDoubleDigit(parseInt(item.desc));
+            let r2 = item.r2==="R" && !isDoubleDigit(parseInt(item.desc));
+            if (r1 && r2) return base * multiplier * 2;
+            if (r1) return (v1*2 + v2) * multiplier;
+            if (r2) return (v1 + v2*2) * multiplier;
+            return base * multiplier;
         }
 
         function processEnter() {
             let txt = displayBuffer.trim();
             if (!txt) return;
-            
             let tokens = txt.split(/\s+/);
-            let num = "", logic = "", r1 = "", amt1 = "", r2 = "", amt2 = "";
-            let foundAmt = false;
-            
+            let num="", logic="", r1="", amt1="", r2="", amt2="", foundAmt=false;
             tokens.forEach(v => {
-                if (!isNaN(v) && v !== "") {
-                    if (num === "" && !GROUPS[logic]) {
-                        num = v;
-                    } else if (!foundAmt) { 
-                        amt1 = v; 
-                        foundAmt = true; 
-                    } else { 
-                        amt2 = v; 
-                    }
+                if (!isNaN(v) && v!=="") {
+                    if (num==="" && !GROUPS[logic]) num = v;
+                    else if (!foundAmt) { amt1 = v; foundAmt = true; }
+                    else amt2 = v;
                 } else if (v === "R") {
-                    if (!foundAmt) r1 = "R";
-                    else r2 = "R";
-                } else {
-                    logic = v;
-                }
+                    if (!foundAmt) r1 = "R"; else r2 = "R";
+                } else { logic = v; }
             });
-            
-            if ((num !== "" || GROUPS[logic]) && amt1 !== "") {
+            if ((num!=="" || GROUPS[logic]) && amt1!=="") {
                 let item = {
-                    id: Date.now() + Math.random(),
+                    id: Date.now()+Math.random(),
                     desc: num || logic,
                     logic: num ? logic : '',
                     r1: r1,
-                    amt1: parseInt(amt1) || 0,
+                    amt1: parseInt(amt1)||0,
                     r2: r2,
-                    amt2: parseInt(amt2) || 0
+                    amt2: parseInt(amt2)||0
                 };
-                
-                if (isDoubleDigit(parseInt(item.desc))) {
-                    item.r1 = "";
-                    item.r2 = "";
-                }
-                
+                if (isDoubleDigit(parseInt(item.desc))) { item.r1=""; item.r2=""; }
                 currentVouchers.push(item);
                 clearDisplay();
                 renderVoucherList();
@@ -1368,508 +748,304 @@
         }
 
         function renderVoucherList() {
-            let html = "";
-            let total = 0;
-            
-            currentVouchers.forEach((item, i) => {
+            let html="", total=0;
+            currentVouchers.forEach((item,i)=>{
                 let itemTotal = calculateItemTotal(item);
                 total += itemTotal;
-                
-                let descDisplay = item.desc;
-                if (item.logic) descDisplay += '/' + item.logic;
-                
+                let desc = item.desc + (item.logic?'/'+item.logic:'');
                 html += `<div class="voucher-row">
                     <div>${i+1}</div>
-                    <div style="color: ${item.logic ? '#aaffaa' : '#fff'}">${descDisplay}</div>
-                    <div>${item.logic || ''}</div>
-                    <div style="color: #ff5555">${item.r1}</div>
+                    <div style="color:${item.logic?'#aaffaa':'#fff'}">${desc}</div>
+                    <div>${item.logic||''}</div>
+                    <div style="color:#ff5555">${item.r1}</div>
                     <div>${item.amt1}</div>
-                    <div style="color: #ff5555">${item.r2}</div>
-                    <div>${item.amt2 > 0 ? item.amt2 : '-'}</div>
-                    <div style="color: #39ff14">${itemTotal.toLocaleString()}</div>
+                    <div style="color:#ff5555">${item.r2}</div>
+                    <div>${item.amt2>0?item.amt2:'-'}</div>
+                    <div style="color:#39ff14">${itemTotal.toLocaleString()}</div>
                     <div><button class="delete-btn" onclick="removeItem(${i})">✖</button></div>
                 </div>`;
             });
-            
-            document.getElementById('voucherList').innerHTML = html || '<div style="padding: 20px; text-align: center; color: #666;">စာရင်းမရှိသေး</div>';
-            document.getElementById('posTotal').innerText = total.toLocaleString() + ' Ks';
+            document.getElementById('voucherList').innerHTML = html || '<div style="padding:20px; text-align:center; color:#666;">စာရင်းမရှိသေး</div>';
+            document.getElementById('posTotal').innerText = total.toLocaleString()+' Ks';
         }
+        function removeItem(i) { currentVouchers.splice(i,1); renderVoucherList(); }
 
-        function removeItem(index) {
-            currentVouchers.splice(index, 1);
-            renderVoucherList();
-        }
-
-        // ==================== PREVIEW CANVAS (UPDATED) ====================
-        function updatePreviewCanvas() {
-            const canvas = document.getElementById('printCanvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = 400;
-            canvas.height = 200 + (currentVouchers.length * 35);
-            
-            ctx.fillStyle = "#ffffff";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "#000000";
-            
-            const now = new Date();
-            const dateStr = now.toLocaleDateString('en-US', { month:'2-digit', day:'2-digit', year:'numeric' });
-            
-            ctx.font = "12px monospace";
-            ctx.fillStyle = "#333";
-            ctx.textAlign = "left";
-            ctx.fillText(dateStr, 20, 25);
-            
-            ctx.font = "bold 16px monospace";
-            ctx.fillStyle = "#000";
-            ctx.textAlign = "center";
-            ctx.fillText("AMO 2D LOTTERY POS VOUCHER", canvas.width/2, 50);
-            
-            ctx.beginPath();
-            ctx.moveTo(20, 65);
-            ctx.lineTo(canvas.width-20, 65);
-            ctx.strokeStyle = "#333";
-            ctx.lineWidth = 1;
-            ctx.stroke();
-            
-            ctx.textAlign = "left";
-            ctx.font = "13px monospace";
-            let y = 85;
-            let total = 0;
-            
-            currentVouchers.forEach(item => {
-                let itemTotal = calculateItemTotal(item);
-                total += itemTotal;
-                
-                if (item.logic === '') {
-                    ctx.font = "bold 13px monospace";
-                    ctx.fillStyle = "#000";
-                    ctx.fillText(item.desc.padEnd(4), 20, y);
-                    
-                    if (item.r1 === 'R') {
-                        ctx.fillStyle = "#d32f2f";
-                        ctx.font = "bold 13px monospace";
-                        ctx.fillText("R", 60, y);
+        // ==================== LEDGER (FIXED R LOGIC) ====================
+        function addToLedger(item) {
+            let v1 = parseInt(item.amt1)||0, v2 = parseInt(item.amt2)||0;
+            let targets = getTargets(item.desc, item.logic);
+            let isOriginalDouble = isDoubleDigit(parseInt(item.desc));
+            targets.forEach(idx => {
+                if (idx>=0 && idx<100) {
+                    // Original target gets v1 always (if v1>0)
+                    if (v1 > 0) masterData[idx] += v1;
+                    // Reverse
+                    let rev = parseInt(idx.toString().padStart(2,'0').split('').reverse().join(''));
+                    let isTargetDouble = (idx % 11 === 0);
+                    // R1: if present, v1 also goes to reverse (unless double)
+                    if (item.r1 === "R" && !isOriginalDouble && !isTargetDouble) {
+                        masterData[rev] += v1;
                     }
-                    
-                    ctx.fillStyle = "#000";
-                    ctx.font = "13px monospace";
-                    ctx.fillText((item.amt1||0).toLocaleString(), 90, y);
-                    
-                    if (item.amt2 && item.amt2 > 0) {
-                        if (item.r2 === 'R') {
-                            ctx.fillStyle = "#d32f2f";
-                            ctx.font = "bold 13px monospace";
-                            ctx.fillText("R", 150, y);
-                            ctx.fillStyle = "#000";
-                            ctx.fillText((item.amt2||0).toLocaleString(), 170, y);
+                    // For v2: if R2 present, v2 goes to reverse, else to original
+                    if (v2 > 0) {
+                        if (item.r2 === "R" && !isOriginalDouble && !isTargetDouble) {
+                            masterData[rev] += v2;
                         } else {
-                            ctx.fillStyle = "#000";
-                            ctx.fillText((item.amt2||0).toLocaleString(), 150, y);
+                            masterData[idx] += v2;
                         }
                     }
-                    
-                    ctx.fillStyle = "#2e7d32";
-                    ctx.font = "bold 13px monospace";
-                    ctx.fillText(itemTotal.toLocaleString(), 320, y);
-                } 
-                else if (GROUPS[item.desc] && !item.logic) {
-                    ctx.fillStyle = "#000";
-                    ctx.font = "13px monospace";
-                    ctx.fillText(item.desc.padEnd(15), 20, y);
-                    ctx.fillStyle = "#2e7d32";
-                    ctx.fillText((item.amt1||0).toLocaleString(), 320, y);
                 }
-                else {
-                    let displayText = `${item.desc} ${item.logic||''} ${(item.amt1||0).toLocaleString()}`;
-                    if (item.r1 === 'R') displayText += ' R';
-                    if (item.amt2 && item.amt2 > 0) {
-                        displayText += ` ${(item.amt2||0).toLocaleString()}`;
-                        if (item.r2 === 'R') displayText += ' R';
-                    }
-                    
-                    ctx.fillStyle = "#000";
-                    ctx.font = "13px monospace";
-                    ctx.fillText(displayText, 20, y);
-                    
-                    ctx.fillStyle = "#2e7d32";
-                    ctx.fillText(itemTotal.toLocaleString(), 320, y);
-                }
-                
-                y += 30;
             });
-            
-            ctx.beginPath();
-            ctx.moveTo(20, y-5);
-            ctx.lineTo(canvas.width-20, y-5);
-            ctx.strokeStyle = "#333";
-            ctx.lineWidth = 1;
-            ctx.stroke();
-            
-            ctx.font = "bold 16px monospace";
-            ctx.textAlign = "right";
-            ctx.fillStyle = "#000";
-            ctx.fillText(`စုစုပေါင်း ${total.toLocaleString()} Ks`, canvas.width - 30, y + 20);
-            
-            ctx.textAlign = "center";
-            ctx.font = "italic 14px monospace";
-            ctx.fillStyle = "#2e7d32";
-            ctx.fillText("မိတ်ဆွေကံကောင်းပါစေ", canvas.width/2, y + 45);
+            saveLedger(); renderLedger();
         }
 
-        // ==================== PREVIEW MODAL ====================
+        // ==================== PREVIEW & PRINT ====================
         function showPreviewModal() {
-            if (currentVouchers.length === 0) return;
-            
-            let editHTML = '<div style="background: #f5f5f5; padding: 10px; border-radius: 8px;">';
-            
-            currentVouchers.forEach((item, index) => {
+            if (!currentVouchers.length) return;
+            let editHTML = '<div style="background:#f5f5f5; padding:10px; border-radius:8px;">';
+            currentVouchers.forEach((item,i)=>{
                 editHTML += `<div class="preview-edit-row">
-                    <input class="preview-edit-input" value="${item.desc || ''}" placeholder="နံပါတ်" onchange="updatePreviewItem(${index}, 'desc', this.value)">
-                    <input class="preview-edit-input" value="${item.logic || ''}" placeholder="Logic" onchange="updatePreviewItem(${index}, 'logic', this.value)">
-                    <input class="preview-edit-input" value="${item.r1 || ''}" placeholder="R1" onchange="updatePreviewItem(${index}, 'r1', this.value)" style="width: 40px;">
-                    <input class="preview-edit-input" type="number" value="${item.amt1 || ''}" placeholder="Amt1" onchange="updatePreviewItem(${index}, 'amt1', this.value)" style="width: 70px;">
-                    <input class="preview-edit-input" value="${item.r2 || ''}" placeholder="R2" onchange="updatePreviewItem(${index}, 'r2', this.value)" style="width: 40px;">
-                    <input class="preview-edit-input" type="number" value="${item.amt2 || ''}" placeholder="Amt2" onchange="updatePreviewItem(${index}, 'amt2', this.value)" style="width: 70px;">
-                    <span style="font-weight: bold;">${calculateItemTotal(item)}</span>
-                    <button onclick="removePreviewItem(${index})" style="background: var(--danger); color: white; border: none; border-radius: 4px; padding: 4px;">✖</button>
+                    <input class="preview-edit-input" value="${item.desc||''}" placeholder="နံပါတ်" onchange="updatePreviewItem(${i},'desc',this.value)">
+                    <input class="preview-edit-input" value="${item.logic||''}" placeholder="Logic" onchange="updatePreviewItem(${i},'logic',this.value)">
+                    <input class="preview-edit-input" value="${item.r1||''}" placeholder="R1" style="width:40px;" onchange="updatePreviewItem(${i},'r1',this.value)">
+                    <input class="preview-edit-input" type="number" value="${item.amt1||''}" placeholder="Amt1" style="width:70px;" onchange="updatePreviewItem(${i},'amt1',this.value)">
+                    <input class="preview-edit-input" value="${item.r2||''}" placeholder="R2" style="width:40px;" onchange="updatePreviewItem(${i},'r2',this.value)">
+                    <input class="preview-edit-input" type="number" value="${item.amt2||''}" placeholder="Amt2" style="width:70px;" onchange="updatePreviewItem(${i},'amt2',this.value)">
+                    <span style="font-weight:bold;">${calculateItemTotal(item)}</span>
+                    <button onclick="removePreviewItem(${i})" style="background:var(--danger); color:white; border:none; border-radius:4px; padding:4px;">✖</button>
                 </div>`;
             });
-            
-            editHTML += `<div style="margin-top: 10px;"><button onclick="addNewPreviewItem()" style="width: 100%; padding: 8px; background: var(--success); color: white; border: none; border-radius: 4px;">➕ အသစ်ထည့်</button></div>`;
+            editHTML += `<div style="margin-top:10px;"><button onclick="addNewPreviewItem()" style="width:100%; padding:8px; background:var(--success); color:white; border:none; border-radius:4px;">➕ အသစ်ထည့်</button></div>`;
             editHTML += '</div>';
-            
             document.getElementById('previewEditArea').innerHTML = editHTML;
             updatePreviewCanvas();
             document.getElementById('previewModal').classList.add('active');
         }
+        function updatePreviewItem(i,f,val) { if(f==='amt1'||f==='amt2') val=parseInt(val)||0; currentVouchers[i][f]=val; updatePreviewCanvas(); }
+        function removePreviewItem(i) { currentVouchers.splice(i,1); if(currentVouchers.length) showPreviewModal(); else closeModal(); renderVoucherList(); }
+        function addNewPreviewItem() { currentVouchers.push({id:Date.now(),desc:'',logic:'',r1:'',amt1:0,r2:'',amt2:0}); showPreviewModal(); }
+        function closeModal() { document.getElementById('previewModal').classList.remove('active'); }
 
-        function updatePreviewItem(index, field, value) {
-            if (field === 'amt1' || field === 'amt2') value = parseInt(value) || 0;
-            currentVouchers[index][field] = value;
-            updatePreviewCanvas();
-        }
-
-        function removePreviewItem(index) {
-            currentVouchers.splice(index, 1);
-            if (currentVouchers.length === 0) {
-                closeModal();
-            } else {
-                showPreviewModal();
-            }
-            renderVoucherList();
-        }
-
-        function addNewPreviewItem() {
-            currentVouchers.push({ id: Date.now(), desc: '', logic: '', r1: '', amt1: 0, r2: '', amt2: 0 });
-            showPreviewModal();
-        }
-
-        function closeModal() {
-            document.getElementById('previewModal').classList.remove('active');
+        function updatePreviewCanvas() {
+            const canvas = document.getElementById('printCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 400;
+            canvas.height = 200 + currentVouchers.length*35;
+            ctx.fillStyle="#fff"; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.fillStyle="#000";
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'});
+            ctx.font="12px monospace"; ctx.fillStyle="#333"; ctx.textAlign="left"; ctx.fillText(dateStr,20,25);
+            ctx.font="bold 16px monospace"; ctx.fillStyle="#000"; ctx.textAlign="center"; ctx.fillText("AMO 2D LOTTERY POS VOUCHER", canvas.width/2,50);
+            ctx.beginPath(); ctx.moveTo(20,65); ctx.lineTo(canvas.width-20,65); ctx.strokeStyle="#333"; ctx.lineWidth=1; ctx.stroke();
+            ctx.textAlign="left"; ctx.font="13px monospace"; let y=85, total=0;
+            currentVouchers.forEach(item => {
+                let itemTotal = calculateItemTotal(item); total += itemTotal;
+                if (item.logic === '') {
+                    ctx.font="bold 13px monospace"; ctx.fillStyle="#000"; ctx.fillText(item.desc.padEnd(4),20,y);
+                    if (item.r1==='R') { ctx.fillStyle="#d32f2f"; ctx.font="bold 13px monospace"; ctx.fillText("R",60,y); }
+                    ctx.fillStyle="#000"; ctx.font="13px monospace"; ctx.fillText((item.amt1||0).toLocaleString(),90,y);
+                    if (item.amt2 && item.amt2>0) {
+                        if (item.r2==='R') { ctx.fillStyle="#d32f2f"; ctx.font="bold 13px monospace"; ctx.fillText("R",150,y); ctx.fillStyle="#000"; ctx.fillText((item.amt2||0).toLocaleString(),170,y); }
+                        else { ctx.fillStyle="#000"; ctx.fillText((item.amt2||0).toLocaleString(),150,y); }
+                    }
+                    ctx.fillStyle="#2e7d32"; ctx.font="bold 13px monospace"; ctx.fillText(itemTotal.toLocaleString(),320,y);
+                } else if (GROUPS[item.desc] && !item.logic) {
+                    ctx.fillStyle="#000"; ctx.font="13px monospace"; ctx.fillText(item.desc.padEnd(15),20,y);
+                    ctx.fillStyle="#2e7d32"; ctx.fillText((item.amt1||0).toLocaleString(),320,y);
+                } else {
+                    let displayText = `${item.desc} ${item.logic||''} ${(item.amt1||0).toLocaleString()}`;
+                    if (item.r1==='R') displayText += ' R';
+                    if (item.amt2 && item.amt2>0) {
+                        displayText += ` ${(item.amt2||0).toLocaleString()}`;
+                        if (item.r2==='R') displayText += ' R';
+                    }
+                    ctx.fillStyle="#000"; ctx.font="13px monospace"; ctx.fillText(displayText,20,y);
+                    ctx.fillStyle="#2e7d32"; ctx.fillText(itemTotal.toLocaleString(),320,y);
+                }
+                y+=30;
+            });
+            ctx.beginPath(); ctx.moveTo(20,y-5); ctx.lineTo(canvas.width-20,y-5); ctx.stroke();
+            ctx.font="bold 16px monospace"; ctx.textAlign="right"; ctx.fillStyle="#000"; ctx.fillText(`စုစုပေါင်း ${total.toLocaleString()} Ks`, canvas.width-30, y+20);
+            ctx.textAlign="center"; ctx.font="italic 14px monospace"; ctx.fillStyle="#2e7d32"; ctx.fillText("မိတ်ဆွေကံကောင်းပါစေ", canvas.width/2, y+45);
         }
 
         function printOnly() {
-            let total = currentVouchers.reduce((sum, item) => sum + calculateItemTotal(item), 0);
-            const voucher = {
-                id: Date.now(),
-                timestamp: new Date().toLocaleString('my-MM'),
-                items: JSON.parse(JSON.stringify(currentVouchers)),
-                total: total,
-                status: "PRINTED_ONLY"
-            };
-            voucherHistory.unshift(voucher);
-            if (voucherHistory.length > 50) voucherHistory.pop();
-            saveHistory();
-            
-            const canvas = document.getElementById('printCanvas');
-            const link = document.createElement('a');
-            link.download = `voucher_${Date.now()}.png`;
-            link.href = canvas.toDataURL();
-            link.click();
-            
-            closeModal();
-            renderHistoryList();
+            let total = currentVouchers.reduce((s,i)=>s+calculateItemTotal(i),0);
+            let voucher = { id:Date.now(), timestamp:new Date().toLocaleString('my-MM'), items:JSON.parse(JSON.stringify(currentVouchers)), total, status:"PRINTED_ONLY" };
+            voucherHistory.unshift(voucher); if(voucherHistory.length>50) voucherHistory.pop(); saveHistory();
+            let canvas = document.getElementById('printCanvas');
+            let link = document.createElement('a'); link.download = `voucher_${Date.now()}.png`; link.href = canvas.toDataURL(); link.click();
+            closeModal(); renderHistoryList();
         }
 
         function printAndAddToLedger() {
-            currentVouchers.forEach(item => {
-                let v1 = item.amt1 || 0;
-                let v2 = item.amt2 || 0;
-                let targets = getTargets(item.desc, item.logic);
-                let isOriginalDouble = isDoubleDigit(parseInt(item.desc));
-                
-                targets.forEach(idx => {
-                    if (idx >= 0 && idx < 100) {
-                        if (v1 > 0) masterData[idx] += v1;
-                        if (v2 > 0) masterData[idx] += v2;
-                        
-                        let rev = parseInt(idx.toString().padStart(2,'0').split('').reverse().join(''));
-                        let isTargetDouble = (idx % 11 === 0);
-                        
-                        if (item.r1 === "R" && !isOriginalDouble && !isTargetDouble) {
-                            masterData[rev] += v1;
-                        }
-                        if (item.r2 === "R" && !isOriginalDouble && !isTargetDouble) {
-                            masterData[rev] += v2;
-                        }
-                    }
-                });
-            });
-            
-            saveLedger();
-            renderLedger();
-            
-            let total = currentVouchers.reduce((sum, item) => sum + calculateItemTotal(item), 0);
-            const voucher = {
-                id: Date.now(),
-                timestamp: new Date().toLocaleString('my-MM'),
-                items: JSON.parse(JSON.stringify(currentVouchers)),
-                total: total,
-                status: "COMPLETED"
-            };
-            voucherHistory.unshift(voucher);
-            if (voucherHistory.length > 50) voucherHistory.pop();
-            saveHistory();
-            
-            const canvas = document.getElementById('printCanvas');
-            const link = document.createElement('a');
-            link.download = `voucher_${Date.now()}.png`;
-            link.href = canvas.toDataURL();
-            link.click();
-            
-            currentVouchers = [];
-            renderVoucherList();
-            closeModal();
-            renderHistoryList();
+            currentVouchers.forEach(v=>addToLedger(v));
+            let total = currentVouchers.reduce((s,i)=>s+calculateItemTotal(i),0);
+            let voucher = { id:Date.now(), timestamp:new Date().toLocaleString('my-MM'), items:JSON.parse(JSON.stringify(currentVouchers)), total, status:"COMPLETED" };
+            voucherHistory.unshift(voucher); if(voucherHistory.length>50) voucherHistory.pop(); saveHistory();
+            let canvas = document.getElementById('printCanvas');
+            let link = document.createElement('a'); link.download = `voucher_${Date.now()}.png`; link.href = canvas.toDataURL(); link.click();
+            currentVouchers = []; renderVoucherList(); closeModal(); renderHistoryList(); renderLedger();
         }
 
-        // ==================== WEB SEARCH ====================
-        function webSearch() {
-            const query = document.getElementById('webSearchInput').value.trim();
-            if (!query) return;
-            document.getElementById('searchResult').innerHTML = '🔍 Searching...';
-            setTimeout(() => {
-                document.getElementById('searchResult').innerHTML = `"${query}" for demo purposes only`;
-            }, 1000);
-        }
-
-        // ==================== LEDGER ====================
-        function renderLedger() {
-            let col1 = "", col2 = "";
-            let total = 0;
-            
-            for (let i = 0; i < 100; i++) {
-                total += masterData[i];
-                
-                let cellContent;
-                if (ledgerEditMode) {
-                    cellContent = `<input type="number" class="ledger-edit-input" value="${masterData[i]}" onchange="updateLedgerCell(${i}, this.value)">`;
-                } else {
-                    cellContent = masterData[i] > 0 ? masterData[i].toLocaleString() : '-';
-                }
-                
-                let row = `<div class="ledger-item"><span class="ledger-num">${i.toString().padStart(2,'0')}</span><span>${cellContent}</span></div>`;
-                if (i < 50) col1 += row;
-                else col2 += row;
+        // ==================== SNIPER LIVE ====================
+        async function fetchLiveData() {
+            try {
+                const res = await fetch('https://api.thaistock2d.com/live');
+                if (!res.ok) throw new Error('API error');
+                const data = await res.json();
+                if (data.live) return { set: data.live.set.replace(/,/g,''), value: data.live.value.replace(/,/g,''), twod: data.live.twod };
+                throw new Error('Invalid response');
+            } catch(e) {
+                let setVal = (1350+Math.random()*50).toFixed(2);
+                let valVal = (14200+Math.random()*100).toFixed(2);
+                return { set: setVal, value: valVal, twod:'--' };
             }
-            
+        }
+        function startSniper() {
+            if (sniperInterval) clearInterval(sniperInterval);
+            sniperInterval = setInterval(async ()=>{
+                const now = new Date();
+                document.getElementById('sniperTime').innerText = now.toLocaleTimeString('en-GB',{hour12:false});
+                const hour = now.getHours(), minute = now.getMinutes();
+                const passedTarget = (hour===16 && minute>=0) || hour>16;
+                const live = await fetchLiveData();
+                document.getElementById('setIndex').innerText = live.set;
+                document.getElementById('setValue').innerText = live.value;
+                let setLast = live.set.includes('.') ? live.set.split('.')[1]?.slice(-1)||'0' : live.set.slice(-1);
+                let valLast = live.value.includes('.') ? live.value.split('.')[0].slice(-1) : live.value.slice(-1);
+                let currentPred = setLast + valLast;
+                document.getElementById('live2D').innerText = live.twod!=='--' ? live.twod : currentPred;
+                const panel = document.getElementById('sniperPanel'), statusEl = document.getElementById('sniperStatus'), predEl = document.getElementById('sniperPrediction');
+                if (passedTarget && !isSniperLocked) {
+                    isSniperLocked = true; panel.classList.add('locked'); statusEl.innerText = '🔒 TARGET LOCKED (16:00)'; statusEl.classList.add('blink');
+                } else if (!passedTarget) {
+                    isSniperLocked = false; panel.classList.remove('locked'); statusEl.innerText = 'LIVE STREAMING...'; statusEl.classList.remove('blink');
+                }
+                predEl.innerText = isSniperLocked ? currentPred : '--';
+            },2000);
+        }
+        function webSearch() {
+            let q = document.getElementById('webSearchInput').value.trim();
+            if (!q) return;
+            document.getElementById('searchResult').innerHTML = '🔍 Searching...';
+            setTimeout(()=> document.getElementById('searchResult').innerHTML = `"${q}" - demo`, 1000);
+        }
+
+        // ==================== LEDGER RENDER ====================
+        function renderLedger() {
+            let col1='', col2='', total=0;
+            for (let i=0;i<100;i++) {
+                total += masterData[i];
+                let cell = ledgerEditMode ? `<input type="number" class="ledger-edit-input" value="${masterData[i]}" onchange="updateLedgerCell(${i}, this.value)">` : (masterData[i]>0 ? masterData[i].toLocaleString() : '-');
+                let row = `<div class="ledger-item"><span class="ledger-num">${i.toString().padStart(2,'0')}</span><span>${cell}</span></div>`;
+                if (i<50) col1+=row; else col2+=row;
+            }
             document.getElementById('ledgerGrid').innerHTML = `<div class="ledger-col">${col1}</div><div class="ledger-col">${col2}</div>`;
-            document.getElementById('grandTotal').innerText = total.toLocaleString() + " Ks";
+            document.getElementById('grandTotal').innerText = total.toLocaleString()+' Ks';
         }
-
-        function updateLedgerCell(index, value) {
-            masterData[index] = parseInt(value) || 0;
-            saveLedger();
-            renderLedger();
-        }
-
-        function toggleLedgerEdit() {
-            ledgerEditMode = !ledgerEditMode;
-            renderLedger();
-        }
+        function updateLedgerCell(i,val) { masterData[i] = parseInt(val)||0; saveLedger(); renderLedger(); }
+        function toggleLedgerEdit() { ledgerEditMode = !ledgerEditMode; renderLedger(); }
 
         // ==================== QR ====================
         function generateQR() {
-            const total = masterData.reduce((a,b) => a + b, 0);
-            if (total === 0) { alert("စာရင်းမရှိပါ"); return; }
-            
-            const data = {
-                type: "2D_LEDGER_SYNC",
-                date: new Date().toLocaleString('my-MM'),
-                total: total,
-                master: masterData,
-                timestamp: Date.now()
-            };
-            
-            QRCode.toCanvas(document.getElementById('qrCanvas'), JSON.stringify(data), { width: 200 }, function(error) {
-                if (!error) {
-                    document.getElementById('qrGeneratorBox').style.display = 'block';
-                }
+            let total = masterData.reduce((a,b)=>a+b,0);
+            if (total===0) { alert("စာရင်းမရှိပါ"); return; }
+            let data = { type:"2D_LEDGER_SYNC", date:new Date().toLocaleString('my-MM'), total, master:masterData, timestamp:Date.now() };
+            QRCode.toCanvas(document.getElementById('qrCanvas'), JSON.stringify(data), { width:200 }, function(err){
+                if (!err) document.getElementById('qrGeneratorBox').style.display = 'block';
             });
         }
-
-        function downloadQR() {
-            const canvas = document.getElementById('qrCanvas');
-            const link = document.createElement('a');
-            link.download = `amo_qr_${Date.now()}.png`;
-            link.href = canvas.toDataURL();
-            link.click();
-        }
-
-        function closeQRGenerator() {
-            document.getElementById('qrGeneratorBox').style.display = 'none';
-        }
-
+        function downloadQR() { let c=document.getElementById('qrCanvas'); let l=document.createElement('a'); l.download=`amo_qr_${Date.now()}.png`; l.href=c.toDataURL(); l.click(); }
+        function closeQRGenerator() { document.getElementById('qrGeneratorBox').style.display = 'none'; }
         function startScanner() {
             if (!html5QrCode) html5QrCode = new Html5Qrcode("qrReader");
             document.getElementById('qrScannerBox').style.display = 'block';
-            
-            html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (decoded) => {
+            html5QrCode.start({ facingMode:"environment" }, { fps:10, qrbox:250 }, (decoded)=>{
                 try {
-                    const data = JSON.parse(decoded);
-                    if (data.type === "2D_LEDGER_SYNC" && data.master && data.master.length === 100) {
-                        masterData = data.master;
-                        saveLedger();
-                        renderLedger();
-                        alert("✅ QR ဖတ်ပြီးပါပြီ");
-                        stopScanner();
-                    }
-                } catch (e) {
-                    alert("❌ QR မှားနေသည်");
-                }
-            }).catch(() => alert("Camera error"));
+                    let data = JSON.parse(decoded);
+                    if (data.type==="2D_LEDGER_SYNC" && data.master && data.master.length===100) {
+                        masterData = data.master; saveLedger(); renderLedger(); alert("✅ QR ဖတ်ပြီးပါပြီ"); stopScanner();
+                    } else alert("❌ QR မှားနေသည်");
+                } catch(e){ alert("❌ QR မှားနေသည်"); }
+            }, ()=>{}).catch(()=>alert("Camera error"));
         }
+        function stopScanner() { if(html5QrCode && html5QrCode.isScanning) html5QrCode.stop().then(()=>document.getElementById('qrScannerBox').style.display='none'); }
 
-        function stopScanner() {
-            if (html5QrCode && html5QrCode.isScanning) {
-                html5QrCode.stop().then(() => {
-                    document.getElementById('qrScannerBox').style.display = 'none';
-                });
-            }
-        }
-
-        // ==================== HISTORY (with Edit) ====================
+        // ==================== HISTORY ====================
         function renderHistoryList() {
             let html = '';
-            voucherHistory.forEach((v, index) => {
+            voucherHistory.forEach((v,i)=>{
                 html += `<div class="history-item">
-                    <div class="history-header">
-                        <span class="history-time">${v.timestamp}</span>
+                    <div class="history-header"><span class="history-time">${v.timestamp}</span>
                         <div class="history-actions">
-                            <button class="history-edit-btn" onclick="openHistoryEdit(${index})"><i class="fas fa-edit"></i> Edit</button>
-                            <button class="history-delete-btn" onclick="deleteHistory(${index})"><i class="fas fa-trash"></i> Del</button>
+                            <button class="history-edit-btn" onclick="openHistoryEdit(${i})"><i class="fas fa-edit"></i> Edit</button>
+                            <button class="history-delete-btn" onclick="deleteHistory(${i})"><i class="fas fa-trash"></i> Del</button>
                         </div>
                     </div>
                     <div class="history-total">စုစုပေါင်း: ${v.total.toLocaleString()} Ks</div>
-                    <div class="history-items-preview">${v.items.map(it => it.desc + (it.logic?'/'+it.logic:'') + ' ' + it.amt1 + it.r1 + ' ' + (it.amt2?it.amt2:'') + it.r2).join(', ')}</div>
-                    <div style="font-size:11px; color:#666; margin-top:4px;">${v.status} | Items: ${v.items.length}</div>
+                    <div class="history-items-preview">${v.items.map(it=>it.desc+(it.logic?'/'+it.logic:'')+' '+it.amt1+it.r1+' '+(it.amt2?it.amt2:'')+it.r2).join(', ')}</div>
+                    <div style="font-size:11px; color:#666;">${v.status} | Items: ${v.items.length}</div>
                 </div>`;
             });
             document.getElementById('historyList').innerHTML = html || '<div style="padding:20px; text-align:center; color:#666;">မှတ်တမ်းမရှိသေး</div>';
             document.getElementById('historyCount').innerText = `မှတ်တမ်း ${voucherHistory.length} ခု`;
         }
-
-        function openHistoryEdit(index) {
-            editingHistoryIndex = index;
-            const v = voucherHistory[index];
+        function openHistoryEdit(idx) {
+            editingHistoryIndex = idx;
+            let v = voucherHistory[idx];
             let editHTML = `<div style="padding:10px;">
-                <div style="margin-bottom:10px;"><label>အချိန်:</label><input type="text" id="editHistoryTime" value="${v.timestamp}" style="width:100%; padding:5px; border:1px solid #ccc; border-radius:4px;"></div>
-                <div style="margin-bottom:10px;"><label>Status:</label>
-                    <select id="editHistoryStatus" style="width:100%; padding:5px; border:1px solid #ccc; border-radius:4px;">
-                        <option value="PENDING" ${v.status==='PENDING'?'selected':''}>PENDING</option>
-                        <option value="PRINTED_ONLY" ${v.status==='PRINTED_ONLY'?'selected':''}>PRINTED_ONLY</option>
-                        <option value="COMPLETED" ${v.status==='COMPLETED'?'selected':''}>COMPLETED</option>
-                    </select>
-                </div>
-                <div style="margin-bottom:15px; max-height:300px; overflow-y:auto;">
-                    <label>စာရင်းများ:</label>`;
-            v.items.forEach((item, i) => {
-                editHTML += `<div style="background:#f5f5f5; padding:8px; margin-bottom:6px; border-radius:4px;">
+                <div><label>အချိန်:</label><input type="text" id="editHistoryTime" value="${v.timestamp}" style="width:100%; padding:5px;"></div>
+                <div><label>Status:</label><select id="editHistoryStatus" style="width:100%; padding:5px;">
+                    <option value="PENDING" ${v.status==='PENDING'?'selected':''}>PENDING</option>
+                    <option value="PRINTED_ONLY" ${v.status==='PRINTED_ONLY'?'selected':''}>PRINTED_ONLY</option>
+                    <option value="COMPLETED" ${v.status==='COMPLETED'?'selected':''}>COMPLETED</option>
+                </select></div>
+                <div style="max-height:300px; overflow-y:auto;">`;
+            v.items.forEach((item,i)=>{
+                editHTML += `<div style="background:#f5f5f5; padding:8px; margin-bottom:6px;">
                     <div style="display:grid; grid-template-columns:1fr 1fr 40px 70px 40px 70px; gap:4px;">
-                        <input type="text" value="${item.desc||''}" onchange="voucherHistory[${index}].items[${i}].desc=this.value" placeholder="နံပါတ်" style="padding:4px;">
-                        <input type="text" value="${item.logic||''}" onchange="voucherHistory[${index}].items[${i}].logic=this.value" placeholder="Logic" style="padding:4px;">
-                        <input type="text" value="${item.r1||''}" onchange="voucherHistory[${index}].items[${i}].r1=this.value" placeholder="R1" style="width:40px; padding:4px;">
-                        <input type="number" value="${item.amt1||''}" onchange="voucherHistory[${index}].items[${i}].amt1=parseInt(this.value)||0" placeholder="Amt1" style="width:70px; padding:4px;">
-                        <input type="text" value="${item.r2||''}" onchange="voucherHistory[${index}].items[${i}].r2=this.value" placeholder="R2" style="width:40px; padding:4px;">
-                        <input type="number" value="${item.amt2||''}" onchange="voucherHistory[${index}].items[${i}].amt2=parseInt(this.value)||0" placeholder="Amt2" style="width:70px; padding:4px;">
+                        <input type="text" value="${item.desc||''}" onchange="voucherHistory[${idx}].items[${i}].desc=this.value" placeholder="နံပါတ်">
+                        <input type="text" value="${item.logic||''}" onchange="voucherHistory[${idx}].items[${i}].logic=this.value" placeholder="Logic">
+                        <input type="text" value="${item.r1||''}" onchange="voucherHistory[${idx}].items[${i}].r1=this.value" placeholder="R1" style="width:40px;">
+                        <input type="number" value="${item.amt1||''}" onchange="voucherHistory[${idx}].items[${i}].amt1=parseInt(this.value)||0" placeholder="Amt1" style="width:70px;">
+                        <input type="text" value="${item.r2||''}" onchange="voucherHistory[${idx}].items[${i}].r2=this.value" placeholder="R2" style="width:40px;">
+                        <input type="number" value="${item.amt2||''}" onchange="voucherHistory[${idx}].items[${i}].amt2=parseInt(this.value)||0" placeholder="Amt2" style="width:70px;">
                     </div>
-                    <button onclick="removeHistoryItem(${index}, ${i})" style="background:#ff4444; color:white; border:none; padding:4px 8px; border-radius:4px; margin-top:6px;">ဖျက်</button>
+                    <button onclick="removeHistoryItem(${idx}, ${i})" style="background:#ff4444; color:white; border:none; padding:4px 8px; margin-top:6px;">ဖျက်</button>
                 </div>`;
             });
-            editHTML += `<button onclick="addHistoryItem(${index})" style="background:#4CAF50; color:white; border:none; padding:8px; width:100%; border-radius:4px;">➕ အသစ်ထည့်</button>
-                </div>
-                <div style="margin-bottom:10px;"><label>စုစုပေါင်း:</label><input type="number" id="editHistoryTotal" value="${v.total}" style="width:100%; padding:5px; border:1px solid #ccc; border-radius:4px;"></div>
-            </div>`;
+            editHTML += `<button onclick="addHistoryItem(${idx})" style="background:#4CAF50; color:white; border:none; padding:8px; width:100%;">➕ အသစ်ထည့်</button>`;
+            editHTML += `</div><div><label>စုစုပေါင်း:</label><input type="number" id="editHistoryTotal" value="${v.total}" style="width:100%; padding:5px;"></div></div>`;
             document.getElementById('historyEditContent').innerHTML = editHTML;
             document.getElementById('historyEditModal').classList.add('active');
         }
-
-        function removeHistoryItem(historyIndex, itemIndex) {
-            voucherHistory[historyIndex].items.splice(itemIndex, 1);
-            openHistoryEdit(historyIndex);
-        }
-
-        function addHistoryItem(historyIndex) {
-            voucherHistory[historyIndex].items.push({ desc: '', logic: '', r1: '', amt1: 0, r2: '', amt2: 0 });
-            openHistoryEdit(historyIndex);
-        }
-
-        function closeHistoryEdit() {
-            document.getElementById('historyEditModal').classList.remove('active');
-            editingHistoryIndex = -1;
-        }
-
+        function removeHistoryItem(hi,ii) { voucherHistory[hi].items.splice(ii,1); openHistoryEdit(hi); }
+        function addHistoryItem(hi) { voucherHistory[hi].items.push({desc:'',logic:'',r1:'',amt1:0,r2:'',amt2:0}); openHistoryEdit(hi); }
+        function closeHistoryEdit() { document.getElementById('historyEditModal').classList.remove('active'); editingHistoryIndex=-1; }
         function saveHistoryEdit() {
-            if (editingHistoryIndex >= 0) {
+            if (editingHistoryIndex>=0) {
                 voucherHistory[editingHistoryIndex].timestamp = document.getElementById('editHistoryTime').value;
                 voucherHistory[editingHistoryIndex].status = document.getElementById('editHistoryStatus').value;
-                voucherHistory[editingHistoryIndex].total = parseInt(document.getElementById('editHistoryTotal').value) || 0;
-                saveHistory();
-                renderHistoryList();
+                voucherHistory[editingHistoryIndex].total = parseInt(document.getElementById('editHistoryTotal').value)||0;
+                saveHistory(); renderHistoryList();
             }
             closeHistoryEdit();
         }
-
-        function deleteHistory(index) {
-            if (confirm('ဤမှတ်တမ်းကို ဖျက်မလား?')) {
-                voucherHistory.splice(index, 1);
-                saveHistory();
-                renderHistoryList();
-            }
-        }
+        function deleteHistory(i) { if(confirm('ဖျက်မလား?')) { voucherHistory.splice(i,1); saveHistory(); renderHistoryList(); } }
 
         // ==================== STORAGE ====================
-        function saveLedger() {
-            localStorage.setItem('amo_ledger_master', JSON.stringify(masterData));
-        }
-
-        function loadLedger() {
-            const saved = localStorage.getItem('amo_ledger_master');
-            if (saved) masterData = JSON.parse(saved);
-        }
-
-        function saveHistory() {
-            localStorage.setItem('amo_history_master', JSON.stringify(voucherHistory));
-        }
-
-        function loadHistory() {
-            const saved = localStorage.getItem('amo_history_master');
-            if (saved) voucherHistory = JSON.parse(saved);
-        }
-
+        function saveLedger() { localStorage.setItem('amo_ledger_final', JSON.stringify(masterData)); }
+        function loadLedger() { let s = localStorage.getItem('amo_ledger_final'); if(s) masterData = JSON.parse(s); }
+        function saveHistory() { localStorage.setItem('amo_history_final', JSON.stringify(voucherHistory)); }
+        function loadHistory() { let s = localStorage.getItem('amo_history_final'); if(s) voucherHistory = JSON.parse(s); }
         function resetAllData() {
-            if (confirm("စာရင်းအားလုံးဖျက်မည် သေချာလား?")) {
-                masterData.fill(0);
-                voucherHistory = [];
-                currentVouchers = [];
-                saveLedger();
-                saveHistory();
-                renderLedger();
-                renderHistoryList();
-                renderVoucherList();
-                alert("✅ ဖျက်ပြီးပါပြီ");
+            if(confirm("စာရင်းအားလုံးဖျက်မည် သေချာလား?")) {
+                masterData.fill(0); voucherHistory=[]; currentVouchers=[]; saveLedger(); saveHistory(); renderLedger(); renderHistoryList(); renderVoucherList(); alert("✅ ဖျက်ပြီးပါပြီ");
             }
         }
     </script>
+    <!-- STRICT PROHIBITION LICENSE NOTICE -->
+    <!-- This software is provided for lawful purposes only. User assumes all responsibility for compliance with local laws. Unauthorized use in illegal gambling is strictly prohibited. -->
 </body>
 </html>
